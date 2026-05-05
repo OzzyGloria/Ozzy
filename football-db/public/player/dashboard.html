@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Player Dashboard — ScoutBase</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="logo"><div class="logo-icon">⚽</div> ScoutBase</a>
+    <div class="nav-links" id="nav-user"></div>
+  </div>
+</nav>
+
+<div class="container" style="padding-top:32px; padding-bottom:60px;">
+  <div class="dashboard-header">
+    <h1 id="welcome">Welcome back</h1>
+    <p>Manage your player profile and upload your season stats.</p>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="sidebar">
+      <div class="sidebar-nav">
+        <a href="#overview" class="active" onclick="showTab('overview',this)">📊 Overview</a>
+        <a href="#upload" onclick="showTab('upload',this)">⬆️ Upload stats</a>
+        <a href="#profiles" onclick="showTab('profiles',this)">📋 My profiles</a>
+      </div>
+      <div style="margin-top:16px; padding:16px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); font-size:0.85rem; color:var(--text-muted);">
+        <strong style="color:var(--text);">How it works</strong>
+        <ol style="padding-left:16px; margin-top:8px; line-height:2;">
+          <li>Select competition level</li>
+          <li>Pay upload fee</li>
+          <li>Fill in your stats</li>
+          <li>Go live to scouts</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <!-- Overview tab -->
+      <div id="tab-overview">
+        <div id="alert-overview" class="alert" style="display:none;"></div>
+        <div id="overview-content">
+          <div class="card" style="text-align:center; padding:48px;">
+            <div style="font-size:2.5rem; margin-bottom:16px;">⚽</div>
+            <h2 style="font-size:1.3rem; font-weight:700; margin-bottom:8px;">No profiles yet</h2>
+            <p style="color:var(--text-muted); margin-bottom:24px;">Upload your stats and get discovered by scouts and sporting directors worldwide.</p>
+            <button class="btn btn-primary" onclick="showTab('upload', null)">Upload my first profile →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upload tab -->
+      <div id="tab-upload" style="display:none;">
+        <!-- Step 1: Choose tier -->
+        <div id="step-tier">
+          <h2 style="font-size:1.2rem; font-weight:700; margin-bottom:6px;">Choose your competition level</h2>
+          <p style="color:var(--text-muted); margin-bottom:24px; font-size:0.9rem;">Select the level that matches where you played this season.</p>
+
+          <div id="alert-upload" class="alert" style="display:none;"></div>
+
+          <div class="tier-cards">
+            <div class="tier-card" onclick="selectTier('grassroots',this)">
+              <div class="tier-name">🏟️ Grassroots</div>
+              <div class="tier-desc">Local & county leagues</div>
+              <div class="tier-price">£9.99</div>
+            </div>
+            <div class="tier-card" onclick="selectTier('semi_pro',this)">
+              <div class="tier-name">⚽ Semi-Professional</div>
+              <div class="tier-desc">Regional & semi-pro leagues</div>
+              <div class="tier-price">£24.99</div>
+            </div>
+            <div class="tier-card" onclick="selectTier('professional',this)">
+              <div class="tier-name">🏆 Professional</div>
+              <div class="tier-desc">National leagues & lower divisions</div>
+              <div class="tier-price">£49.99</div>
+            </div>
+            <div class="tier-card" onclick="selectTier('elite',this)">
+              <div class="tier-name">⭐ Elite</div>
+              <div class="tier-desc">Top divisions & international</div>
+              <div class="tier-price">£99.99</div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-lg" id="pay-btn" onclick="proceedToPayment()" disabled>
+            Continue to payment →
+          </button>
+          <p style="color:var(--text-dim); font-size:0.82rem; margin-top:12px;">Secure payment via Stripe. Profile goes live after payment + stats submission.</p>
+        </div>
+      </div>
+
+      <!-- Profiles tab -->
+      <div id="tab-profiles" style="display:none;">
+        <h2 style="font-size:1.2rem; font-weight:700; margin-bottom:20px;">My profiles</h2>
+        <div id="profiles-list">
+          <div class="card" style="text-align:center; padding:32px; color:var(--text-muted);">Loading…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stat upload modal -->
+<div id="stats-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:200; overflow-y:auto; padding:40px 24px;">
+  <div style="max-width:760px; margin:0 auto;">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+        <h2 style="font-size:1.3rem; font-weight:800;">Enter your season stats</h2>
+        <button class="btn btn-ghost btn-sm" onclick="closeModal()">✕ Close</button>
+      </div>
+      <div id="alert-stats" class="alert" style="display:none;"></div>
+      <form id="stats-form">
+        <input type="hidden" name="submission_id" id="submission-id-input" />
+
+        <h4 style="color:var(--text-muted); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:16px;">Identity</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Position *</label>
+            <select class="form-control" name="position" required>
+              <option value="">Select position</option>
+              <option>GK</option><option>CB</option><option>LB</option><option>RB</option>
+              <option>LWB</option><option>RWB</option><option>CDM</option><option>CM</option>
+              <option>CAM</option><option>LM</option><option>RM</option><option>LW</option>
+              <option>RW</option><option>CF</option><option>ST</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Secondary position</label>
+            <select class="form-control" name="secondary_position">
+              <option value="">None</option>
+              <option>GK</option><option>CB</option><option>LB</option><option>RB</option>
+              <option>LWB</option><option>RWB</option><option>CDM</option><option>CM</option>
+              <option>CAM</option><option>LM</option><option>RM</option><option>LW</option>
+              <option>RW</option><option>CF</option><option>ST</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Age</label>
+            <input class="form-control" type="number" name="age" min="14" max="45" placeholder="e.g. 22" />
+          </div>
+          <div class="form-group">
+            <label>Nationality</label>
+            <input class="form-control" type="text" name="nationality" placeholder="e.g. English" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Club</label>
+            <input class="form-control" type="text" name="club" placeholder="e.g. FC Northgate" />
+          </div>
+          <div class="form-group">
+            <label>League</label>
+            <input class="form-control" type="text" name="league" placeholder="e.g. Championship" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Preferred foot</label>
+            <select class="form-control" name="preferred_foot">
+              <option value="">Select</option>
+              <option>Right</option><option>Left</option><option>Both</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Season</label>
+            <input class="form-control" type="text" name="season" value="2024/25" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Height (cm)</label>
+            <input class="form-control" type="number" name="height_cm" min="140" max="220" placeholder="e.g. 183" />
+          </div>
+          <div class="form-group">
+            <label>Weight (kg)</label>
+            <input class="form-control" type="number" name="weight_kg" min="50" max="120" placeholder="e.g. 78" />
+          </div>
+        </div>
+
+        <h4 style="color:var(--text-muted); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.08em; margin:20px 0 16px;">Season stats</h4>
+        <div class="form-row">
+          <div class="form-group"><label>Appearances</label><input class="form-control" type="number" name="appearances" min="0" /></div>
+          <div class="form-group"><label>Minutes played</label><input class="form-control" type="number" name="minutes_played" min="0" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Goals</label><input class="form-control" type="number" name="goals" min="0" /></div>
+          <div class="form-group"><label>Assists</label><input class="form-control" type="number" name="assists" min="0" /></div>
+        </div>
+
+        <h4 style="color:var(--text-muted); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.08em; margin:20px 0 16px;">Per-90 stats</h4>
+        <div class="form-row">
+          <div class="form-group"><label>Shots / 90</label><input class="form-control" type="number" name="shots_per_90" step="0.01" min="0" /></div>
+          <div class="form-group"><label>Shot accuracy %</label><input class="form-control" type="number" name="shot_accuracy_pct" min="0" max="100" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>xG / 90</label><input class="form-control" type="number" name="xg_per_90" step="0.01" min="0" /></div>
+          <div class="form-group"><label>Dribbles / 90</label><input class="form-control" type="number" name="dribbles_per_90" step="0.01" min="0" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Dribble success %</label><input class="form-control" type="number" name="dribble_success_pct" min="0" max="100" /></div>
+          <div class="form-group"><label>Pass accuracy %</label><input class="form-control" type="number" name="pass_accuracy_pct" min="0" max="100" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Key passes / 90</label><input class="form-control" type="number" name="key_passes_per_90" step="0.01" min="0" /></div>
+          <div class="form-group"><label>xA / 90</label><input class="form-control" type="number" name="xa_per_90" step="0.01" min="0" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Tackles / 90</label><input class="form-control" type="number" name="tackles_per_90" step="0.01" min="0" /></div>
+          <div class="form-group"><label>Tackle success %</label><input class="form-control" type="number" name="tackle_success_pct" min="0" max="100" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Interceptions / 90</label><input class="form-control" type="number" name="interceptions_per_90" step="0.01" min="0" /></div>
+          <div class="form-group"><label>Aerial duels won %</label><input class="form-control" type="number" name="aerial_duels_won_pct" min="0" max="100" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Pressures / 90</label><input class="form-control" type="number" name="pressures_per_90" step="0.01" min="0" /></div>
+          <div class="form-group"><label>Progressive passes / 90</label><input class="form-control" type="number" name="progressive_passes_per_90" step="0.01" min="0" /></div>
+        </div>
+
+        <h4 style="color:var(--text-muted); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.08em; margin:20px 0 16px;">Goalkeeping (GK only)</h4>
+        <div class="form-row">
+          <div class="form-group"><label>Saves / 90</label><input class="form-control" type="number" name="saves_per_90" step="0.01" min="0" /></div>
+          <div class="form-group"><label>Save %</label><input class="form-control" type="number" name="save_pct" min="0" max="100" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Clean sheets</label><input class="form-control" type="number" name="clean_sheets" min="0" /></div>
+          <div class="form-group"><label>xG prevented</label><input class="form-control" type="number" name="xg_prevented" step="0.01" /></div>
+        </div>
+
+        <h4 style="color:var(--text-muted); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.08em; margin:20px 0 16px;">About you</h4>
+        <div class="form-group">
+          <label>Bio (optional)</label>
+          <textarea class="form-control" name="bio" rows="3" placeholder="Brief description of your playing style, achievements, goals…" style="resize:vertical;"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Highlights video URL (optional)</label>
+          <input class="form-control" type="url" name="highlights_url" placeholder="https://youtube.com/..." />
+          <div class="form-hint">YouTube, Vimeo, or any public link to your highlight reel.</div>
+        </div>
+
+        <div style="display:flex; gap:12px; margin-top:8px;">
+          <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-lg" id="stats-submit-btn">Publish my profile →</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+let selectedTier = null;
+let currentSubmissionId = null;
+
+const user = requireAuth('player');
+if (user) {
+  document.getElementById('welcome').textContent = `Welcome back, ${user.full_name.split(' ')[0]}`;
+  loadOverview();
+
+  // Check if returning from payment
+  const params = new URLSearchParams(location.search);
+  const sid = params.get('submission_id');
+  if (sid) {
+    currentSubmissionId = sid;
+    openStatsModal(sid);
+    history.replaceState({}, '', '/player/dashboard.html');
+  }
+}
+
+function showTab(name, el) {
+  ['overview','upload','profiles'].forEach(t => {
+    document.getElementById(`tab-${t}`).style.display = 'none';
+  });
+  document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById(`tab-${name}`).style.display = 'block';
+  if (el) el.classList.add('active');
+  if (name === 'profiles') loadProfiles();
+}
+
+function selectTier(tier, el) {
+  document.querySelectorAll('.tier-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedTier = tier;
+  document.getElementById('pay-btn').disabled = false;
+}
+
+async function proceedToPayment() {
+  if (!selectedTier) return;
+  const btn = document.getElementById('pay-btn');
+  const alert = document.getElementById('alert-upload');
+  clearAlert(alert);
+  btn.disabled = true;
+  btn.textContent = 'Redirecting to payment…';
+
+  try {
+    const res = await Payments.playerCheckout(selectedTier);
+    if (res.demo) {
+      // Demo mode — no Stripe configured, go straight to stats form
+      currentSubmissionId = res.submission_id;
+      openStatsModal(res.submission_id);
+    } else {
+      window.location.href = res.url;
+    }
+  } catch (err) {
+    showError(alert, err.error || 'Payment failed. Please try again.');
+    btn.disabled = false;
+    btn.textContent = 'Continue to payment →';
+  }
+}
+
+function openStatsModal(submissionId) {
+  document.getElementById('submission-id-input').value = submissionId;
+  document.getElementById('stats-modal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('stats-modal').style.display = 'none';
+  document.body.style.overflow = '';
+  showTab('profiles', document.querySelector('.sidebar-nav a:nth-child(3)'));
+  loadProfiles();
+}
+
+document.getElementById('stats-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('stats-submit-btn');
+  const alert = document.getElementById('alert-stats');
+  clearAlert(alert);
+  btn.disabled = true;
+  btn.textContent = 'Publishing…';
+
+  const fd = new FormData(e.target);
+  const body = { submission_id: Number(fd.get('submission_id')) };
+  fd.forEach((v, k) => { if (k !== 'submission_id' && v !== '') body[k] = isNaN(v) || v === '' ? v : Number(v); });
+
+  try {
+    await Players.submit(body);
+    closeModal();
+    showSuccess(document.getElementById('alert-overview'), 'Your profile is now live and visible to scouts!');
+    showTab('overview', document.querySelector('.sidebar-nav a:first-child'));
+    loadOverview();
+  } catch (err) {
+    showError(alert, err.error || 'Failed to submit stats.');
+    btn.disabled = false;
+    btn.textContent = 'Publish my profile →';
+  }
+});
+
+async function loadOverview() {
+  try {
+    const subs = await Players.mySubmissions();
+    const el = document.getElementById('overview-content');
+    if (!subs.length) return;
+    const visible = subs.filter(s => s.is_visible);
+    const pending = subs.filter(s => s.payment_status === 'pending');
+    el.innerHTML = `
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:24px;">
+        <div class="card card-sm" style="text-align:center;">
+          <div style="font-size:1.8rem; font-weight:800; color:var(--green-light);">${subs.length}</div>
+          <div style="color:var(--text-muted); font-size:0.85rem;">Total profiles</div>
+        </div>
+        <div class="card card-sm" style="text-align:center;">
+          <div style="font-size:1.8rem; font-weight:800; color:var(--green-light);">${visible.length}</div>
+          <div style="color:var(--text-muted); font-size:0.85rem;">Live to scouts</div>
+        </div>
+        <div class="card card-sm" style="text-align:center;">
+          <div style="font-size:1.8rem; font-weight:800; color:var(--gold);">${pending.length}</div>
+          <div style="color:var(--text-muted); font-size:0.85rem;">Awaiting payment</div>
+        </div>
+      </div>
+      ${subs.slice(0,3).map(renderSubmissionCard).join('')}
+    `;
+  } catch {}
+}
+
+async function loadProfiles() {
+  const el = document.getElementById('profiles-list');
+  el.innerHTML = '<div class="card" style="text-align:center; padding:24px; color:var(--text-muted);">Loading…</div>';
+  try {
+    const subs = await Players.mySubmissions();
+    if (!subs.length) {
+      el.innerHTML = '<div class="card" style="text-align:center; padding:32px; color:var(--text-muted);">No profiles yet. <a href="#upload" onclick="showTab(\'upload\',null)">Upload your first one →</a></div>';
+      return;
+    }
+    el.innerHTML = subs.map(renderSubmissionCard).join('');
+  } catch { el.innerHTML = '<div class="card card-sm" style="color:var(--red);">Failed to load profiles.</div>'; }
+}
+
+function renderSubmissionCard(s) {
+  const statusBadge = s.is_visible
+    ? '<span class="badge badge-green">✓ Live</span>'
+    : s.payment_status === 'paid'
+      ? '<span class="badge badge-gold">Stats needed</span>'
+      : '<span class="badge badge-gray">Pending payment</span>';
+
+  return `
+    <div class="card" style="margin-bottom:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+        <div>
+          <span style="font-weight:700; font-size:1rem;">${s.position || 'Position TBC'}</span>
+          <span style="color:var(--text-muted); margin-left:10px; font-size:0.9rem;">${s.season || ''} · ${s.competition_level.replace('_',' ')}</span>
+        </div>
+        ${statusBadge}
+      </div>
+      ${s.club ? `<div style="color:var(--text-muted); font-size:0.85rem;">${s.club}${s.league ? ` · ${s.league}` : ''}</div>` : ''}
+      ${s.payment_status === 'paid' && !s.is_visible ? `<button class="btn btn-primary btn-sm" style="margin-top:12px;" onclick="openStatsModal(${s.id})">Fill in stats →</button>` : ''}
+    </div>
+  `;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scout Login — ScoutBase</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="logo"><div class="logo-icon">⚽</div> ScoutBase</a>
+    <div class="nav-links"><div id="nav-user"></div></div>
+  </div>
+</nav>
+
+<div class="page-center">
+  <div class="auth-card">
+    <h1>Scout sign in</h1>
+    <p class="subtitle">Access the full player database.</p>
+
+    <div id="alert" class="alert" style="display:none;"></div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label>Email address</label>
+        <input class="form-control" type="email" name="email" placeholder="you@club.com" required />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input class="form-control" type="password" name="password" placeholder="Your password" required />
+      </div>
+      <button type="submit" class="btn btn-gold btn-full btn-lg" id="submit-btn">Sign in →</button>
+    </form>
+
+    <div class="auth-divider">No account yet? <a href="/scout/register.html">Create one</a></div>
+    <div class="auth-divider" style="margin-top:4px;">Are you a player? <a href="/player/login.html">Player sign in</a></div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('submit-btn');
+  const alert = document.getElementById('alert');
+  clearAlert(alert);
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+
+  const fd = new FormData(e.target);
+  try {
+    const { token: tok, user } = await Auth.login({ email: fd.get('email'), password: fd.get('password') });
+    if (user.role !== 'scout') throw { error: 'This login is for scouts. Use the player login instead.' };
+    setToken(tok);
+    setUser(user);
+    window.location.href = '/scout/dashboard.html';
+  } catch (err) {
+    showError(alert, err.error || 'Login failed.');
+    btn.disabled = false;
+    btn.textContent = 'Sign in →';
+  }
+});
+</script>
+</body>
+</html>
