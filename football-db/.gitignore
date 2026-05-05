@@ -2,3 +2,4 @@ node_modules/
 db/players.db
 db/players.db-shm
 db/players.db-wal
+.env

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScoutBase — The Football Scouting Database</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="logo">
+      <div class="logo-icon">⚽</div>
+      ScoutBase
+    </a>
+    <div class="nav-links">
+      <a href="#how-it-works">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="/player/login.html">Player login</a>
+      <a href="/scout/login.html">Scout login</a>
+      <div id="nav-user"></div>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section style="background:var(--bg); padding:0;">
+  <div class="container">
+    <div class="hero">
+      <div class="hero-eyebrow">🌍 Connecting talent with opportunity</div>
+      <h1>The database scouts<br><span>actually trust</span></h1>
+      <p>Players upload verified stats from their competition. Scouts and sporting directors search by any metric to find exactly who they need.</p>
+      <div class="hero-ctas">
+        <a href="/player/register.html" class="btn btn-primary btn-lg">Upload my stats →</a>
+        <a href="/scout/register.html" class="btn btn-gold btn-lg">Scout access</a>
+      </div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="value">30+</div>
+        <div class="label">Stats tracked per player</div>
+      </div>
+      <div class="stat-item">
+        <div class="value">4</div>
+        <div class="label">Competition tiers</div>
+      </div>
+      <div class="stat-item">
+        <div class="value">15</div>
+        <div class="label">Positions covered</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section id="how-it-works">
+  <div class="container">
+    <div class="section-title">
+      <h2>Built for both sides of the game</h2>
+      <p>Two simple flows — whether you're trying to get noticed or trying to find a gem.</p>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+      <div class="card">
+        <div style="font-size:2rem; margin-bottom:16px;">🎯</div>
+        <h3 style="font-size:1.2rem; font-weight:700; margin-bottom:12px;">For Players</h3>
+        <ol style="padding-left:20px; color:var(--text-muted); font-size:0.95rem; line-height:2;">
+          <li>Create a free account</li>
+          <li>Select your competition level</li>
+          <li>Pay a one-time profile fee</li>
+          <li>Fill in your season stats</li>
+          <li>Get discovered by scouts worldwide</li>
+        </ol>
+        <a href="/player/register.html" class="btn btn-primary" style="margin-top:20px;">Get started</a>
+      </div>
+
+      <div class="card">
+        <div style="font-size:2rem; margin-bottom:16px;">🔍</div>
+        <h3 style="font-size:1.2rem; font-weight:700; margin-bottom:12px;">For Scouts & Sporting Directors</h3>
+        <ol style="padding-left:20px; color:var(--text-muted); font-size:0.95rem; line-height:2;">
+          <li>Create a scout account</li>
+          <li>Choose monthly or annual membership</li>
+          <li>Access the full player database</li>
+          <li>Filter by 30+ stats, position, league</li>
+          <li>Contact players directly</li>
+        </ol>
+        <a href="/scout/register.html" class="btn btn-gold" style="margin-top:20px;">Start scouting</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats covered -->
+<section style="background:var(--surface);">
+  <div class="container">
+    <div class="section-title">
+      <h2>Every stat that matters</h2>
+      <p>Scouts filter on any combination of metrics — no spreadsheets, no guesswork.</p>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:16px;">
+      <div class="card card-sm">
+        <div style="color:var(--green-light); font-weight:700; margin-bottom:8px;">⚡ Attacking</div>
+        <div style="color:var(--text-muted); font-size:0.85rem; line-height:1.9;">Goals · Assists · xG/90<br>Shots/90 · Shot accuracy<br>Dribbles/90 · Success %</div>
+      </div>
+      <div class="card card-sm">
+        <div style="color:var(--green-light); font-weight:700; margin-bottom:8px;">🎯 Passing</div>
+        <div style="color:var(--text-muted); font-size:0.85rem; line-height:1.9;">Pass accuracy · xA/90<br>Key passes/90<br>Progressive passes/90</div>
+      </div>
+      <div class="card card-sm">
+        <div style="color:var(--green-light); font-weight:700; margin-bottom:8px;">🛡️ Defending</div>
+        <div style="color:var(--text-muted); font-size:0.85rem; line-height:1.9;">Tackles/90 · Success %<br>Interceptions/90<br>Aerial duels · Pressures</div>
+      </div>
+      <div class="card card-sm">
+        <div style="color:var(--green-light); font-weight:700; margin-bottom:8px;">🧤 Goalkeeping</div>
+        <div style="color:var(--text-muted); font-size:0.85rem; line-height:1.9;">Save % · Saves/90<br>Clean sheets<br>xG prevented</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section id="pricing">
+  <div class="container">
+    <div class="section-title">
+      <h2>Transparent pricing</h2>
+      <p>Players pay once to publish. Scouts pay a flat membership for unlimited access.</p>
+    </div>
+
+    <h3 style="font-size:1rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:20px;">For Players — one-time upload fee</h3>
+    <div class="pricing-grid" style="margin-bottom:48px;" id="player-pricing">
+      <div class="pricing-card">
+        <div class="pricing-label">Grassroots</div>
+        <div class="pricing-price"><sup>£</sup>9<span style="font-size:1.2rem">.99</span></div>
+        <div class="pricing-period">Local & county leagues</div>
+        <ul class="pricing-features">
+          <li>Full stat profile published</li>
+          <li>Visible to all scout members</li>
+          <li>Highlights video link</li>
+          <li>Personal bio</li>
+        </ul>
+        <a href="/player/register.html" class="btn btn-outline btn-full">Get started</a>
+      </div>
+      <div class="pricing-card">
+        <div class="pricing-label">Semi-Professional</div>
+        <div class="pricing-price"><sup>£</sup>24<span style="font-size:1.2rem">.99</span></div>
+        <div class="pricing-period">Regional & semi-pro leagues</div>
+        <ul class="pricing-features">
+          <li>Full stat profile published</li>
+          <li>Visible to all scout members</li>
+          <li>Highlights video link</li>
+          <li>Personal bio</li>
+        </ul>
+        <a href="/player/register.html" class="btn btn-outline btn-full">Get started</a>
+      </div>
+      <div class="pricing-card featured">
+        <div class="pricing-badge">Most popular</div>
+        <div class="pricing-label">Professional</div>
+        <div class="pricing-price"><sup>£</sup>49<span style="font-size:1.2rem">.99</span></div>
+        <div class="pricing-period">National leagues & lower divisions</div>
+        <ul class="pricing-features">
+          <li>Full stat profile published</li>
+          <li>Visible to all scout members</li>
+          <li>Highlights video link</li>
+          <li>Personal bio</li>
+        </ul>
+        <a href="/player/register.html" class="btn btn-primary btn-full">Get started</a>
+      </div>
+      <div class="pricing-card">
+        <div class="pricing-label">Elite</div>
+        <div class="pricing-price"><sup>£</sup>99<span style="font-size:1.2rem">.99</span></div>
+        <div class="pricing-period">Top divisions & international</div>
+        <ul class="pricing-features">
+          <li>Full stat profile published</li>
+          <li>Visible to all scout members</li>
+          <li>Highlights video link</li>
+          <li>Personal bio</li>
+        </ul>
+        <a href="/player/register.html" class="btn btn-outline btn-full">Get started</a>
+      </div>
+    </div>
+
+    <h3 style="font-size:1rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:20px;">For Scouts & Sporting Directors — membership</h3>
+    <div class="pricing-grid" style="max-width:700px; margin:0 auto;">
+      <div class="pricing-card scout">
+        <div class="pricing-label">Monthly</div>
+        <div class="pricing-price"><sup>£</sup>149</div>
+        <div class="pricing-period">per month · cancel anytime</div>
+        <ul class="pricing-features">
+          <li>Unlimited player searches</li>
+          <li>30+ stat filters</li>
+          <li>All competition levels</li>
+          <li>Player contact details</li>
+          <li>New players weekly</li>
+        </ul>
+        <a href="/scout/register.html" class="btn btn-gold btn-full">Start monthly</a>
+      </div>
+      <div class="pricing-card scout" style="position:relative;">
+        <div class="pricing-badge gold">Save £790 / year</div>
+        <div class="pricing-label">Annual</div>
+        <div class="pricing-price"><sup>£</sup>999</div>
+        <div class="pricing-period">per year · ~£83/month</div>
+        <ul class="pricing-features">
+          <li>Everything in Monthly</li>
+          <li>Priority support</li>
+          <li>Early access to new features</li>
+          <li>CSV data export</li>
+          <li>Team seat add-ons available</li>
+        </ul>
+        <a href="/scout/register.html" class="btn btn-gold btn-full">Start annual</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer style="border-top:1px solid var(--border); padding:40px 0; text-align:center; color:var(--text-dim); font-size:0.85rem;">
+  <div class="container">
+    <div class="logo" style="justify-content:center; margin-bottom:12px;">
+      <div class="logo-icon">⚽</div> ScoutBase
+    </div>
+    <p>Connecting football talent with opportunity — worldwide.</p>
+  </div>
+</footer>
+
+<script src="/js/api.js"></script>
+</body>
+</html>

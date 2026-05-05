@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scout Dashboard — ScoutBase</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="logo"><div class="logo-icon">⚽</div> ScoutBase</a>
+    <div class="nav-links" id="nav-user"></div>
+  </div>
+</nav>
+
+<div class="container" style="padding-top:32px; padding-bottom:60px;">
+  <div class="dashboard-header">
+    <h1 id="welcome">Scout Dashboard</h1>
+    <p id="welcome-sub">Search and filter players by any stat combination.</p>
+  </div>
+
+  <!-- Membership paywall -->
+  <div id="paywall" style="display:none;">
+    <div class="paywall">
+      <div class="icon">🔒</div>
+      <h2>Membership required</h2>
+      <p>Activate a membership to access the full player database with unlimited filtering across 30+ stats.</p>
+      <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-bottom:12px;">
+        <div class="card" style="width:260px; text-align:center; padding:24px;">
+          <div style="font-weight:800; font-size:1.1rem; margin-bottom:4px;">Monthly</div>
+          <div style="font-size:2rem; font-weight:800; color:var(--gold);">£149<span style="font-size:1rem; font-weight:400; color:var(--text-muted);">/mo</span></div>
+          <div style="color:var(--text-muted); font-size:0.85rem; margin-bottom:16px;">Cancel anytime</div>
+          <button class="btn btn-gold btn-full" onclick="startMembership('monthly')">Activate monthly</button>
+        </div>
+        <div class="card" style="width:260px; text-align:center; padding:24px; border-color:var(--gold);">
+          <div style="font-weight:800; font-size:1.1rem; margin-bottom:4px;">Annual <span class="badge badge-gold">Save £790</span></div>
+          <div style="font-size:2rem; font-weight:800; color:var(--gold);">£999<span style="font-size:1rem; font-weight:400; color:var(--text-muted);">/yr</span></div>
+          <div style="color:var(--text-muted); font-size:0.85rem; margin-bottom:16px;">~£83/month</div>
+          <button class="btn btn-gold btn-full" onclick="startMembership('annual')">Activate annual</button>
+        </div>
+      </div>
+      <div id="alert-paywall" class="alert" style="display:none; max-width:400px; margin:0 auto;"></div>
+    </div>
+  </div>
+
+  <!-- Main dashboard (members only) -->
+  <div id="dashboard-main" style="display:none;">
+    <div class="dashboard-grid">
+      <div class="sidebar">
+        <div class="sidebar-nav">
+          <a href="#search" class="active" onclick="showTab('search',this)">🔍 Search players</a>
+          <a href="#saved" onclick="showTab('saved',this)">⭐ Saved players</a>
+          <a href="#account" onclick="showTab('account',this)">👤 Account</a>
+        </div>
+        <div id="membership-badge" style="margin-top:16px;"></div>
+      </div>
+
+      <div>
+        <!-- Search tab -->
+        <div id="tab-search">
+          <div class="card card-sm" style="margin-bottom:16px;">
+            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:10px; margin-bottom:12px;">
+              <div class="form-group" style="margin:0;">
+                <label>Name</label>
+                <input class="form-control" id="f-name" type="text" placeholder="Player name" />
+              </div>
+              <div class="form-group" style="margin:0;">
+                <label>Position</label>
+                <select class="form-control" id="f-position">
+                  <option value="">Any</option>
+                  <option>GK</option><option>CB</option><option>LB</option><option>RB</option>
+                  <option>LWB</option><option>RWB</option><option>CDM</option><option>CM</option>
+                  <option>CAM</option><option>LM</option><option>RM</option><option>LW</option>
+                  <option>RW</option><option>CF</option><option>ST</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin:0;">
+                <label>Nationality</label>
+                <input class="form-control" id="f-nationality" type="text" placeholder="e.g. French" />
+              </div>
+              <div class="form-group" style="margin:0;">
+                <label>Competition level</label>
+                <select class="form-control" id="f-level">
+                  <option value="">Any</option>
+                  <option value="grassroots">Grassroots</option>
+                  <option value="semi_pro">Semi-Pro</option>
+                  <option value="professional">Professional</option>
+                  <option value="elite">Elite</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin:0;">
+                <label>Min age</label>
+                <input class="form-control" id="f-min-age" type="number" placeholder="16" min="14" max="45" />
+              </div>
+              <div class="form-group" style="margin:0;">
+                <label>Max age</label>
+                <input class="form-control" id="f-max-age" type="number" placeholder="35" min="14" max="45" />
+              </div>
+            </div>
+
+            <!-- Stat filters -->
+            <details style="margin-bottom:12px;">
+              <summary style="cursor:pointer; font-size:0.85rem; font-weight:600; color:var(--text-muted); user-select:none;">⚙️ Advanced stat filters</summary>
+              <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:10px; margin-top:12px;">
+                <div class="form-group" style="margin:0;"><label>Min goals</label><input class="form-control" id="f-min-goals" type="number" placeholder="0" min="0" /></div>
+                <div class="form-group" style="margin:0;"><label>Min assists</label><input class="form-control" id="f-min-assists" type="number" placeholder="0" min="0" /></div>
+                <div class="form-group" style="margin:0;"><label>Min xG/90</label><input class="form-control" id="f-min-xg" type="number" step="0.01" placeholder="0.00" /></div>
+                <div class="form-group" style="margin:0;"><label>Min pass acc %</label><input class="form-control" id="f-min-pass" type="number" placeholder="0" min="0" max="100" /></div>
+                <div class="form-group" style="margin:0;"><label>Min tackles/90</label><input class="form-control" id="f-min-tackles" type="number" step="0.01" placeholder="0.00" /></div>
+                <div class="form-group" style="margin:0;"><label>Min aerial won %</label><input class="form-control" id="f-min-aerial" type="number" placeholder="0" min="0" max="100" /></div>
+                <div class="form-group" style="margin:0;"><label>Min save %</label><input class="form-control" id="f-min-save" type="number" placeholder="0" min="0" max="100" /></div>
+                <div class="form-group" style="margin:0;"><label>Min pressures/90</label><input class="form-control" id="f-min-pressures" type="number" step="0.01" placeholder="0.00" /></div>
+                <div class="form-group" style="margin:0;"><label>Preferred foot</label>
+                  <select class="form-control" id="f-foot">
+                    <option value="">Any</option><option>Left</option><option>Right</option><option>Both</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin:0;"><label>League</label><input class="form-control" id="f-league" type="text" placeholder="e.g. Championship" /></div>
+              </div>
+            </details>
+
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <div class="form-group" style="margin:0; display:flex; align-items:center; gap:8px;">
+                <label style="white-space:nowrap; margin:0;">Sort by</label>
+                <select class="form-control" id="f-sort" style="width:auto;">
+                  <option value="created_at">Newest</option>
+                  <option value="goals">Goals</option>
+                  <option value="assists">Assists</option>
+                  <option value="xg_per_90">xG/90</option>
+                  <option value="pass_accuracy_pct">Pass acc</option>
+                  <option value="tackles_per_90">Tackles/90</option>
+                  <option value="save_pct">Save %</option>
+                  <option value="pressures_per_90">Pressures/90</option>
+                  <option value="age">Age</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" onclick="runSearch()">Search →</button>
+              <button class="btn btn-ghost btn-sm" onclick="clearFilters()">Clear</button>
+              <span id="result-count" style="color:var(--text-muted); font-size:0.85rem;"></span>
+            </div>
+          </div>
+
+          <div id="alert-search" class="alert" style="display:none;"></div>
+          <div id="search-results">
+            <div style="text-align:center; padding:40px; color:var(--text-muted);">Run a search to see players.</div>
+          </div>
+          <div id="load-more-wrap" style="text-align:center; margin-top:16px; display:none;">
+            <button class="btn btn-outline" onclick="loadMore()">Load more</button>
+          </div>
+        </div>
+
+        <!-- Saved players tab -->
+        <div id="tab-saved" style="display:none;">
+          <h2 style="font-size:1.2rem; font-weight:700; margin-bottom:20px;">Saved players</h2>
+          <div id="saved-list"></div>
+        </div>
+
+        <!-- Account tab -->
+        <div id="tab-account" style="display:none;">
+          <h2 style="font-size:1.2rem; font-weight:700; margin-bottom:20px;">Account</h2>
+          <div id="account-info"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Player detail modal -->
+<div id="player-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:200; overflow-y:auto; padding:40px 24px;">
+  <div style="max-width:760px; margin:0 auto;">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+        <h2 id="modal-title" style="font-size:1.4rem; font-weight:800;"></h2>
+        <button class="btn btn-ghost btn-sm" onclick="closePlayerModal()">✕ Close</button>
+      </div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+const user = requireAuth('scout');
+let searchOffset = 0;
+let lastParams = {};
+let savedIds = JSON.parse(localStorage.getItem('sb_saved') || '[]');
+
+if (user) {
+  document.getElementById('welcome').textContent = `Welcome, ${user.full_name.split(' ')[0]}`;
+  checkMembership();
+}
+
+async function checkMembership() {
+  try {
+    const me = await Auth.me();
+    const membership = me.membership;
+    if (membership && membership.status === 'active') {
+      document.getElementById('dashboard-main').style.display = 'block';
+      renderMembershipBadge(membership);
+      renderAccount(me);
+      renderSaved();
+      // Auto-run initial search
+      runSearch();
+    } else {
+      document.getElementById('paywall').style.display = 'block';
+    }
+  } catch { document.getElementById('paywall').style.display = 'block'; }
+}
+
+async function startMembership(plan) {
+  const alert = document.getElementById('alert-paywall');
+  clearAlert(alert);
+  try {
+    const res = await Payments.scoutCheckout(plan);
+    if (res.demo) { window.location.reload(); return; }
+    window.location.href = res.url;
+  } catch (err) {
+    showError(alert, err.error || 'Failed to start checkout.');
+  }
+}
+
+function renderMembershipBadge(m) {
+  const el = document.getElementById('membership-badge');
+  const end = m.current_period_end ? new Date(m.current_period_end).toLocaleDateString() : '—';
+  el.innerHTML = `
+    <div style="padding:14px; background:var(--gold-dim); border:1px solid rgba(245,158,11,0.3); border-radius:var(--radius); font-size:0.85rem;">
+      <div class="badge badge-gold" style="margin-bottom:8px;">⭐ ${m.plan === 'annual' ? 'Annual' : 'Monthly'} Member</div>
+      <div style="color:var(--text-muted); margin-top:6px;">Renews ${end}</div>
+    </div>
+  `;
+}
+
+function showTab(name, el) {
+  ['search','saved','account'].forEach(t => document.getElementById(`tab-${t}`).style.display = 'none');
+  document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById(`tab-${name}`).style.display = 'block';
+  if (el) el.classList.add('active');
+  if (name === 'saved') renderSaved();
+}
+
+function buildParams() {
+  const p = {};
+  const add = (key, id) => { const v = document.getElementById(id)?.value.trim(); if (v) p[key] = v; };
+  add('name','f-name'); add('position','f-position'); add('nationality','f-nationality');
+  add('competition_level','f-level'); add('preferred_foot','f-foot'); add('league','f-league');
+  add('min_age','f-min-age'); add('max_age','f-max-age');
+  add('min_goals','f-min-goals'); add('min_assists','f-min-assists');
+  add('min_xg_per_90','f-min-xg'); add('min_pass_accuracy_pct','f-min-pass');
+  add('min_tackles_per_90','f-min-tackles'); add('min_aerial_duels_won_pct','f-min-aerial');
+  add('min_save_pct','f-min-save'); add('min_pressures_per_90','f-min-pressures');
+  p.sort_by = document.getElementById('f-sort').value;
+  p.limit = 20;
+  return p;
+}
+
+async function runSearch() {
+  searchOffset = 0;
+  lastParams = buildParams();
+  const el = document.getElementById('search-results');
+  const alertEl = document.getElementById('alert-search');
+  clearAlert(alertEl);
+  el.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted);">Searching…</div>';
+  document.getElementById('load-more-wrap').style.display = 'none';
+
+  try {
+    const data = await Players.list({ ...lastParams, offset: 0 });
+    document.getElementById('result-count').textContent = `${data.total} player${data.total !== 1 ? 's' : ''} found`;
+    if (!data.players.length) {
+      el.innerHTML = '<div class="card" style="text-align:center; padding:40px; color:var(--text-muted);">No players match your filters.</div>';
+      return;
+    }
+    el.innerHTML = data.players.map(renderPlayerRow).join('');
+    searchOffset = data.players.length;
+    if (data.total > searchOffset) document.getElementById('load-more-wrap').style.display = 'block';
+  } catch (err) {
+    if (err.code === 'MEMBERSHIP_REQUIRED') { document.getElementById('dashboard-main').style.display='none'; document.getElementById('paywall').style.display='block'; return; }
+    showError(alertEl, err.error || 'Search failed.');
+    el.innerHTML = '';
+  }
+}
+
+async function loadMore() {
+  try {
+    const data = await Players.list({ ...lastParams, offset: searchOffset });
+    const el = document.getElementById('search-results');
+    el.innerHTML += data.players.map(renderPlayerRow).join('');
+    searchOffset += data.players.length;
+    if (data.total <= searchOffset) document.getElementById('load-more-wrap').style.display = 'none';
+  } catch {}
+}
+
+function clearFilters() {
+  ['f-name','f-nationality','f-league','f-min-age','f-max-age','f-min-goals','f-min-assists',
+   'f-min-xg','f-min-pass','f-min-tackles','f-min-aerial','f-min-save','f-min-pressures'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  ['f-position','f-level','f-foot','f-sort'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.selectedIndex = 0;
+  });
+  runSearch();
+}
+
+function renderPlayerRow(p) {
+  const isSaved = savedIds.includes(p.id);
+  const levelMap = { grassroots:'Grassroots', semi_pro:'Semi-Pro', professional:'Professional', elite:'Elite' };
+  return `
+    <div class="card" style="margin-bottom:12px; cursor:pointer;" onclick="openPlayer(${p.id})">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <div style="font-size:1.05rem; font-weight:700;">${p.full_name}</div>
+          <div style="margin-top:3px;">
+            <span class="badge badge-gray">${p.position || '—'}</span>
+            <span class="badge badge-green" style="margin-left:6px;">${levelMap[p.competition_level] || p.competition_level}</span>
+            ${p.age ? `<span style="color:var(--text-muted); font-size:0.85rem; margin-left:8px;">Age ${p.age}</span>` : ''}
+            ${p.nationality ? `<span style="color:var(--text-muted); font-size:0.85rem;"> · ${p.nationality}</span>` : ''}
+          </div>
+          ${p.club ? `<div style="color:var(--text-dim); font-size:0.82rem; margin-top:4px;">${p.club}${p.league ? ` · ${p.league}` : ''}</div>` : ''}
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); toggleSave(${p.id}, this)" style="color:${isSaved ? 'var(--gold)' : 'var(--text-dim)'};">${isSaved ? '★' : '☆'}</button>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(90px,1fr)); gap:8px; margin-top:14px;">
+        ${p.goals != null ? statChip('Goals', p.goals) : ''}
+        ${p.assists != null ? statChip('Assists', p.assists) : ''}
+        ${p.xg_per_90 ? statChip('xG/90', fmtNum(p.xg_per_90, 2)) : ''}
+        ${p.pass_accuracy_pct ? statChip('Pass %', fmtNum(p.pass_accuracy_pct, 0) + '%') : ''}
+        ${p.tackles_per_90 ? statChip('Tkl/90', fmtNum(p.tackles_per_90, 1)) : ''}
+        ${p.save_pct ? statChip('Save %', fmtNum(p.save_pct, 0) + '%') : ''}
+      </div>
+    </div>
+  `;
+}
+
+function statChip(label, val) {
+  return `<div class="stat-pill"><div class="val">${val}</div><div class="lbl">${label}</div></div>`;
+}
+
+async function openPlayer(id) {
+  document.getElementById('player-modal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  document.getElementById('modal-body').innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted);">Loading…</div>';
+
+  try {
+    const p = await Players.get(id);
+    document.getElementById('modal-title').textContent = p.full_name;
+    document.getElementById('modal-body').innerHTML = buildPlayerDetail(p);
+  } catch { document.getElementById('modal-body').innerHTML = '<div class="alert alert-error">Failed to load player.</div>'; }
+}
+
+function buildPlayerDetail(p) {
+  const row = (label, val, suffix='') => val != null && val !== 0
+    ? `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:0.9rem;">
+        <span style="color:var(--text-muted);">${label}</span>
+        <span style="font-weight:600;">${val}${suffix}</span>
+       </div>`
+    : '';
+
+  return `
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+      <div>
+        <h4 style="font-size:0.8rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:12px;">Identity</h4>
+        ${row('Position', p.position)} ${row('Secondary', p.secondary_position)}
+        ${row('Age', p.age)} ${row('Nationality', p.nationality)}
+        ${row('Club', p.club)} ${row('League', p.league)}
+        ${row('Season', p.season)} ${row('Level', p.competition_level?.replace('_',' '))}
+        ${row('Height', p.height_cm, ' cm')} ${row('Weight', p.weight_kg, ' kg')}
+        ${row('Preferred foot', p.preferred_foot)}
+        ${p.highlights_url ? `<a href="${p.highlights_url}" target="_blank" class="btn btn-outline btn-sm" style="margin-top:12px;" onclick="event.stopPropagation()">▶ Highlights</a>` : ''}
+      </div>
+      <div>
+        <h4 style="font-size:0.8rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:12px;">Season stats</h4>
+        ${row('Appearances', p.appearances)} ${row('Minutes', p.minutes_played)}
+        ${row('Goals', p.goals)} ${row('Assists', p.assists)}
+        ${row('xG/90', fmtNum(p.xg_per_90,2))} ${row('Shots/90', fmtNum(p.shots_per_90,1))}
+        ${row('Shot acc', p.shot_accuracy_pct, '%')} ${row('Dribbles/90', fmtNum(p.dribbles_per_90,1))}
+        ${row('Dribble %', p.dribble_success_pct, '%')} ${row('Pass acc', p.pass_accuracy_pct, '%')}
+        ${row('Key passes/90', fmtNum(p.key_passes_per_90,1))} ${row('xA/90', fmtNum(p.xa_per_90,2))}
+        ${row('Prog passes/90', fmtNum(p.progressive_passes_per_90,1))}
+        ${row('Tackles/90', fmtNum(p.tackles_per_90,1))} ${row('Tackle %', p.tackle_success_pct, '%')}
+        ${row('Interceptions/90', fmtNum(p.interceptions_per_90,1))} ${row('Aerial won %', p.aerial_duels_won_pct, '%')}
+        ${row('Pressures/90', fmtNum(p.pressures_per_90,1))}
+        ${row('Saves/90', fmtNum(p.saves_per_90,1))} ${row('Save %', p.save_pct, '%')}
+        ${row('Clean sheets', p.clean_sheets)} ${row('xG prevented', fmtNum(p.xg_prevented,1))}
+      </div>
+    </div>
+    ${p.bio ? `<div style="margin-top:20px; padding:16px; background:var(--bg); border-radius:var(--radius-sm);"><p style="color:var(--text-muted); font-size:0.9rem;">${p.bio}</p></div>` : ''}
+  `;
+}
+
+function closePlayerModal() {
+  document.getElementById('player-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function toggleSave(id, btn) {
+  const idx = savedIds.indexOf(id);
+  if (idx === -1) { savedIds.push(id); btn.textContent = '★'; btn.style.color = 'var(--gold)'; }
+  else { savedIds.splice(idx, 1); btn.textContent = '☆'; btn.style.color = 'var(--text-dim)'; }
+  localStorage.setItem('sb_saved', JSON.stringify(savedIds));
+}
+
+function renderSaved() {
+  const el = document.getElementById('saved-list');
+  if (!savedIds.length) {
+    el.innerHTML = '<div class="card" style="text-align:center; padding:32px; color:var(--text-muted);">No saved players yet. Star a player from search to save them here.</div>';
+    return;
+  }
+  el.innerHTML = savedIds.map(id => `
+    <div class="card card-sm" style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+      <span>Player #${id}</span>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-outline btn-sm" onclick="openPlayer(${id})">View</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleSave(${id},this); renderSaved()">Remove</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderAccount(me) {
+  document.getElementById('account-info').innerHTML = `
+    <div class="card">
+      <div style="margin-bottom:16px;">
+        <div style="font-size:1.2rem; font-weight:700;">${me.full_name}</div>
+        <div style="color:var(--text-muted); font-size:0.9rem;">${me.scout_title || 'Scout'}${me.organisation ? ` · ${me.organisation}` : ''}</div>
+        <div style="color:var(--text-dim); font-size:0.85rem; margin-top:4px;">${me.email}</div>
+      </div>
+      ${me.membership ? `
+        <div style="padding:12px; background:var(--gold-dim); border:1px solid rgba(245,158,11,0.2); border-radius:var(--radius-sm); font-size:0.88rem;">
+          <span class="badge badge-gold">⭐ ${me.membership.plan} membership</span>
+          <span style="color:var(--text-muted); margin-left:10px;">Status: <strong>${me.membership.status}</strong></span>
+          ${me.membership.current_period_end ? `<div style="color:var(--text-muted); margin-top:4px;">Renews ${new Date(me.membership.current_period_end).toLocaleDateString()}</div>` : ''}
+        </div>
+      ` : ''}
+      <button class="btn btn-ghost btn-sm" style="margin-top:16px;" onclick="logout()">Sign out</button>
+    </div>
+  `;
+}
+</script>
+</body>
+</html>
