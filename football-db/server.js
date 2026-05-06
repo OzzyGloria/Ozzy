@@ -21,6 +21,11 @@ app.use('/api/auth', authRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/players', playersRouter);
 
+// Download the standalone mockup HTML file
+app.get('/download/mockup', (req, res) => {
+  res.download(path.join(__dirname, 'public', 'mockup.html'), 'ScoutBase-mockup.html');
+});
+
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
