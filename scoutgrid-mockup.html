@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScoutGrid — Football Intelligence Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Design tokens ─────────────────────────────────────────── */
+    :root {
+      --navy:   #0A0F1E;
+      --navy-800: #0D1426;
+      --navy-700: #111827;
+      --navy-600: #1A2332;
+      --navy-500: #243045;
+      --green:  #00FF87;
+      --green-dark: #00CC6A;
+      --gold:   #F5A623;
+      --white:  #F9FAFB;
+      --muted:  #9CA3AF;
+      --border: rgba(255,255,255,0.1);
+    }
+
+    /* ── Reset / base ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: inherit; }
+
+    /* ── Utilities ─────────────────────────────────────────────── */
+    .font-display { font-family: 'Bebas Neue', 'Barlow Condensed', sans-serif; letter-spacing: 0.05em; }
+    .text-green  { color: var(--green); }
+    .text-gold   { color: var(--gold); }
+    .text-muted  { color: var(--muted); }
+    .text-white  { color: var(--white); }
+
+    .glass-card {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    .glass-card-hover {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      transition: border-color .2s, background .2s, transform .2s;
+    }
+    .glass-card-hover:hover {
+      border-color: rgba(0,255,135,0.25);
+      background: rgba(255,255,255,0.07);
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      background: var(--green);
+      color: #000;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 12px 28px;
+      border-radius: 8px;
+      border: none;
+      letter-spacing: 0.04em;
+      transition: background .2s, transform .15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary:hover { background: var(--green-dark); transform: translateY(-1px); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--white);
+      font-weight: 500;
+      font-size: 14px;
+      padding: 11px 24px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      transition: border-color .2s, background .2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-outline:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.05); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      padding: 3px 8px;
+      border-radius: 999px;
+    }
+    .badge-green { background: rgba(0,255,135,0.12); color: var(--green); border: 1px solid rgba(0,255,135,0.2); }
+    .badge-gold  { background: rgba(245,166,35,0.12); color: var(--gold);  border: 1px solid rgba(245,166,35,0.2); }
+    .badge-blue  { background: rgba(96,165,250,0.12); color: #60A5FA;      border: 1px solid rgba(96,165,250,0.2); }
+    .badge-white { background: rgba(255,255,255,0.08); color: #fff;         border: 1px solid rgba(255,255,255,0.12); }
+
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+    @media (max-width: 768px) { .container { padding: 0 16px; } }
+
+    /* ── Navbar ─────────────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(10,15,30,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      height: 64px;
+      display: flex;
+      align-items: center;
+    }
+    .nav-inner {
+      width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 0.1em; }
+    .logo span { color: var(--green); }
+    .nav-links { display: flex; align-items: center; gap: 32px; }
+    .nav-links a { font-size: 13px; color: rgba(255,255,255,0.6); font-weight: 500; transition: color .2s; }
+    .nav-links a:hover { color: #fff; }
+    .nav-actions { display: flex; align-items: center; gap: 12px; }
+
+    /* ── Hero ───────────────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 100px 0 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,255,135,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,135,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .hero-glow {
+      position: absolute;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(0,255,135,0.07) 0%, transparent 60%);
+      top: -100px; left: 50%; transform: translateX(-50%);
+      pointer-events: none;
+    }
+    .hero-content {
+      position: relative; z-index: 1;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+    }
+    @media (max-width: 900px) { .hero-content { grid-template-columns: 1fr; } }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--green); margin-bottom: 20px;
+    }
+    .hero-eyebrow::before {
+      content: ''; display: inline-block;
+      width: 24px; height: 2px; background: var(--green); border-radius: 2px;
+    }
+    .hero h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(52px, 7vw, 84px);
+      line-height: 0.95;
+      letter-spacing: 0.03em;
+      margin-bottom: 24px;
+    }
+    .hero h1 .accent { color: var(--green); }
+    .hero-desc {
+      font-size: 17px; color: rgba(255,255,255,0.55); max-width: 480px;
+      line-height: 1.7; margin-bottom: 36px;
+    }
+    .hero-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .hero-stats { display: flex; gap: 32px; margin-top: 48px; }
+    .hero-stat-value {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 38px; color: var(--white); letter-spacing: 0.03em; line-height: 1;
+    }
+    .hero-stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; letter-spacing: 0.05em; text-transform: uppercase; }
+
+    /* Hero right: player card stack */
+    .hero-card-stack { position: relative; height: 420px; }
+    .hero-card-stack .card-behind {
+      position: absolute; top: 20px; right: -10px;
+      width: 280px; opacity: 0.4; transform: rotate(3deg);
+    }
+    .hero-card-stack .card-front {
+      position: absolute; top: 0; left: 20px;
+      width: 300px;
+    }
+
+    /* ── Scarcity banner ─────────────────────────────────────────── */
+    .scarcity-banner {
+      background: linear-gradient(135deg, rgba(0,255,135,0.06), rgba(245,166,35,0.04));
+      border: 1px solid rgba(0,255,135,0.15);
+      border-radius: 12px;
+      padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      flex-wrap: wrap;
+    }
+    .scarcity-pulse {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(0,255,135,0.4); }
+      50% { box-shadow: 0 0 0 6px rgba(0,255,135,0); }
+    }
+    .progress-bar { background: rgba(255,255,255,0.08); height: 5px; border-radius: 99px; width: 160px; }
+    .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--green), var(--gold)); width: 73%; }
+
+    /* ── Section headers ─────────────────────────────────────────── */
+    .section { padding: 80px 0; }
+    .section-eyebrow {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--green); margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-eyebrow::before {
+      content: ''; width: 20px; height: 2px; background: var(--green); border-radius: 2px;
+    }
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(36px, 5vw, 54px);
+      line-height: 1; letter-spacing: 0.04em; margin-bottom: 16px;
+    }
+    .section-subtitle { color: rgba(255,255,255,0.45); max-width: 540px; font-size: 15px; }
+
+    /* ── Player cards ────────────────────────────────────────────── */
+    .player-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: border-color .2s, transform .2s;
+    }
+    .player-card:hover { border-color: rgba(0,255,135,0.3); transform: translateY(-3px); }
+    .player-card-banner {
+      height: 70px;
+      background: linear-gradient(135deg, var(--navy-600), var(--navy-500));
+      position: relative;
+    }
+    .player-card-body { padding: 0 16px 16px; }
+    .player-card-avatar {
+      width: 56px; height: 56px; border-radius: 50%;
+      border: 3px solid var(--navy-800);
+      margin-top: -28px;
+      background: var(--navy-600);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--muted);
+      position: relative; z-index: 1;
+    }
+    .player-card-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px; letter-spacing: 0.04em; margin-top: 8px;
+    }
+    .player-card-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .player-card-stats {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px; margin-top: 14px;
+    }
+    .stat-box {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 6px;
+      text-align: center;
+    }
+    .stat-box .val { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--white); line-height: 1; }
+    .stat-box .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+
+    .rating-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 14px; background: rgba(255,255,255,0.04);
+      border-radius: 8px; padding: 10px 12px;
+    }
+    .rating-circle {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Bebas Neue', sans-serif; font-size: 18px;
+    }
+    .rating-circle.high { background: rgba(0,255,135,0.15); color: var(--green); border: 1px solid rgba(0,255,135,0.3); }
+    .rating-circle.med  { background: rgba(245,166,35,0.15); color: var(--gold);  border: 1px solid rgba(245,166,35,0.3); }
+
+    /* ── Search UI ───────────────────────────────────────────────── */
+    .search-bar {
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+    }
+    .search-icon { color: var(--muted); font-size: 18px; }
+    .search-input {
+      flex: 1; background: transparent; border: none; outline: none;
+      color: var(--white); font-size: 15px; font-family: inherit;
+    }
+    .search-input::placeholder { color: rgba(255,255,255,0.3); }
+    .filter-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 12px; color: rgba(255,255,255,0.7);
+      transition: border-color .2s;
+      cursor: pointer;
+    }
+    .filter-chip:hover, .filter-chip.active {
+      border-color: rgba(0,255,135,0.4); color: var(--green);
+      background: rgba(0,255,135,0.06);
+    }
+    .filter-chip.active::after { content: ' ✕'; font-size: 10px; }
+
+    /* ── Radar chart (CSS-drawn) ─────────────────────────────────── */
+    .radar-wrap {
+      position: relative; width: 200px; height: 200px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .radar-svg { overflow: visible; }
+
+    /* ── Profile page ────────────────────────────────────────────── */
+    .profile-banner {
+      height: 180px;
+      background: linear-gradient(135deg, #0D1426 0%, #243045 50%, #1A2332 100%);
+      position: relative;
+      border-radius: 16px 16px 0 0;
+      overflow: hidden;
+    }
+    .profile-banner::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(to right, rgba(0,255,135,0.06), transparent, rgba(245,166,35,0.06));
+    }
+    .profile-number {
+      position: absolute; right: 24px; bottom: -10px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 120px; color: rgba(255,255,255,0.04);
+      line-height: 1; letter-spacing: -5px;
+      user-select: none;
+    }
+    .profile-avatar {
+      width: 96px; height: 96px; border-radius: 50%;
+      border: 4px solid var(--navy-800);
+      background: var(--navy-600);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: var(--muted);
+      margin-top: -48px; margin-left: 24px; position: relative; z-index: 1;
+    }
+
+    /* ── Pricing ─────────────────────────────────────────────────── */
+    .pricing-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px 24px;
+      display: flex; flex-direction: column;
+      transition: border-color .2s, transform .2s;
+    }
+    .pricing-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.2); }
+    .pricing-card.featured {
+      border-color: rgba(0,255,135,0.35);
+      background: rgba(0,255,135,0.03);
+      position: relative;
+    }
+    .pricing-card.featured::before {
+      content: 'MOST POPULAR';
+      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      font-size: 10px; font-weight: 700; letter-spacing: 0.15em;
+      background: var(--green); color: #000;
+      padding: 3px 12px; border-radius: 999px;
+    }
+    .price-amount {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 56px; line-height: 1; letter-spacing: 0.02em;
+    }
+    .price-period { font-size: 13px; color: var(--muted); }
+    .feature-list { list-style: none; margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+    .feature-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: rgba(255,255,255,0.7); }
+    .feature-list li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+    .feature-list li.locked { color: rgba(255,255,255,0.25); }
+    .feature-list li.locked::before { content: '—'; color: rgba(255,255,255,0.2); }
+
+    /* ── Dashboard sidebar ───────────────────────────────────────── */
+    .sidebar {
+      background: var(--navy-800);
+      border-right: 1px solid var(--border);
+      width: 240px; min-height: 600px;
+      padding: 20px 16px;
+      border-radius: 16px 0 0 16px;
+      flex-shrink: 0;
+    }
+    .sidebar-nav { margin-top: 24px; display: flex; flex-direction: column; gap: 4px; }
+    .sidebar-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 12px; border-radius: 10px;
+      font-size: 13px; color: rgba(255,255,255,0.55);
+      transition: background .15s, color .15s;
+      cursor: pointer;
+    }
+    .sidebar-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+    .sidebar-item.active { background: rgba(0,255,135,0.08); color: var(--green); border: 1px solid rgba(0,255,135,0.15); }
+    .sidebar-icon { font-size: 16px; width: 20px; text-align: center; }
+
+    /* ── Grid helpers ────────────────────────────────────────────── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    @media (max-width: 900px) {
+      .grid-3 { grid-template-columns: 1fr 1fr; }
+      .grid-4 { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    }
+
+    /* ── Page tabs ───────────────────────────────────────────────── */
+    .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 32px; }
+    .tab {
+      padding: 12px 20px; font-size: 13px; font-weight: 500;
+      color: rgba(255,255,255,0.4); cursor: pointer; border-bottom: 2px solid transparent;
+      transition: color .15s, border-color .15s; margin-bottom: -1px;
+    }
+    .tab.active { color: var(--white); border-color: var(--green); }
+    .tab:hover { color: rgba(255,255,255,0.8); }
+
+    /* ── Divider ─────────────────────────────────────────────────── */
+    hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
+    /* ── Footer ──────────────────────────────────────────────────── */
+    footer {
+      background: var(--navy-800);
+      border-top: 1px solid var(--border);
+      padding: 48px 0 32px;
+    }
+    .footer-grid {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px;
+    }
+    @media (max-width: 768px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 24px; } }
+    .footer-links { display: flex; flex-direction: column; gap: 10px; }
+    .footer-links a { font-size: 13px; color: var(--muted); transition: color .2s; }
+    .footer-links a:hover { color: var(--white); }
+
+    /* ── Animations ──────────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp .5s ease both; }
+    .fade-up-1 { animation-delay: .1s; }
+    .fade-up-2 { animation-delay: .2s; }
+    .fade-up-3 { animation-delay: .3s; }
+    .fade-up-4 { animation-delay: .4s; }
+
+    /* ── Scrollbar ───────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--navy); }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+
+    /* ── Misc ────────────────────────────────────────────────────── */
+    .divider-v { width: 1px; background: var(--border); align-self: stretch; }
+    .chip {
+      display: inline-block;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 11px; color: var(--muted);
+    }
+    .availability-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dot-green { background: var(--green); }
+    .dot-gold  { background: var(--gold); }
+    .dot-red   { background: #F87171; }
+
+    .market-val { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--green); }
+
+    .section-divider {
+      width: 100%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,255,135,0.2), transparent);
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     NAVBAR
+══════════════════════════════════════════════════════════════ -->
+<nav>
+  <div class="nav-inner">
+    <div class="logo">Scout<span>Grid</span></div>
+    <div class="nav-links">
+      <a href="#search">Search Players</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#dashboard">Dashboard</a>
+      <a href="#">About</a>
+    </div>
+    <div class="nav-actions">
+      <button class="btn-outline" style="padding:8px 18px;font-size:13px;">Log in</button>
+      <button class="btn-primary" style="padding:8px 18px;font-size:13px;">Get Started →</button>
+    </div>
+  </div>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     HERO SECTION
+══════════════════════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="container">
+
+    <!-- Scarcity banner -->
+    <div class="scarcity-banner fade-up" style="max-width:700px;margin:0 auto 48px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="scarcity-pulse"></div>
+        <span style="font-size:13px;font-weight:600;">Founding Member Pricing</span>
+        <span style="font-size:12px;color:var(--muted);">— only 27 Scout Pro spots remaining</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="progress-bar"><div class="progress-fill"></div></div>
+        <span style="font-size:12px;color:var(--muted);">73% filled</span>
+      </div>
+    </div>
+
+    <div class="hero-content">
+      <!-- Left -->
+      <div>
+        <div class="hero-eyebrow fade-up">Football Intelligence Platform</div>
+        <h1 class="fade-up fade-up-1">FROM <span class="accent">UNKNOWN</span> TO <span class="accent">UNSTOPPABLE</span></h1>
+        <p class="hero-desc fade-up fade-up-2">
+          ScoutGrid connects talented footballers with scouts, agents, and clubs worldwide.
+          Build your verified profile. Get discovered. Change your career.
+        </p>
+        <div class="hero-actions fade-up fade-up-3">
+          <button class="btn-primary">Create Free Profile →</button>
+          <button class="btn-outline">Browse Players</button>
+        </div>
+        <div class="hero-stats fade-up fade-up-4">
+          <div>
+            <div class="hero-stat-value">4,200+</div>
+            <div class="hero-stat-label">Player Profiles</div>
+          </div>
+          <div class="divider-v"></div>
+          <div>
+            <div class="hero-stat-value">380</div>
+            <div class="hero-stat-label">Active Scouts</div>
+          </div>
+          <div class="divider-v"></div>
+          <div>
+            <div class="hero-stat-value">62</div>
+            <div class="hero-stat-label">Countries</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: stacked player cards -->
+      <div class="hero-card-stack fade-up fade-up-2">
+        <!-- Card behind -->
+        <div class="player-card card-behind">
+          <div class="player-card-banner" style="background:linear-gradient(135deg,#1a2332,#243045);">
+            <div style="position:absolute;bottom:6px;right:10px;font-family:'Bebas Neue',sans-serif;font-size:48px;color:rgba(255,255,255,0.06);line-height:1;">#11</div>
+          </div>
+          <div class="player-card-body">
+            <div class="player-card-avatar">MO</div>
+            <div class="player-card-name">Marco Oliveira</div>
+            <div class="player-card-meta">LW · FC Porto B · 🇵🇹 Portugal</div>
+          </div>
+        </div>
+
+        <!-- Card front -->
+        <div class="player-card card-front glass-card">
+          <div class="player-card-banner" style="background:linear-gradient(135deg,#0d1f35,#1e3a5f,#0d1f35);">
+            <div style="position:absolute;top:10px;left:14px;">
+              <span class="badge badge-green">● AVAILABLE</span>
+            </div>
+            <div style="position:absolute;top:10px;right:14px;">
+              <span class="badge badge-gold">✓ VERIFIED</span>
+            </div>
+            <div style="position:absolute;bottom:6px;right:10px;font-family:'Bebas Neue',sans-serif;font-size:64px;color:rgba(255,255,255,0.06);line-height:1;">#9</div>
+          </div>
+          <div class="player-card-body">
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;">
+              <div class="player-card-avatar" style="width:64px;height:64px;font-size:26px;">JR</div>
+              <div style="text-align:right;margin-bottom:4px;">
+                <div style="font-size:11px;color:var(--muted);">Market Value</div>
+                <div class="market-val">€ 3.2M</div>
+              </div>
+            </div>
+            <div class="player-card-name">Javier Reyes</div>
+            <div class="player-card-meta">ST · Real Betis B · 🇪🇸 Spain · 22 yrs</div>
+
+            <div class="player-card-stats">
+              <div class="stat-box">
+                <div class="val" style="color:var(--green);">18</div>
+                <div class="lbl">Goals</div>
+              </div>
+              <div class="stat-box">
+                <div class="val">9</div>
+                <div class="lbl">Assists</div>
+              </div>
+              <div class="stat-box">
+                <div class="val">34</div>
+                <div class="lbl">Apps</div>
+              </div>
+            </div>
+
+            <div class="rating-bar">
+              <div>
+                <div style="font-size:11px;color:var(--muted);margin-bottom:2px;">Overall</div>
+                <div class="rating-circle high" style="width:36px;height:36px;font-size:16px;">78</div>
+              </div>
+              <div style="flex:1;margin:0 16px;">
+                <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:4px;"><span>Pace</span><span>87</span></div>
+                <div style="height:3px;background:rgba(255,255,255,0.08);border-radius:99px;"><div style="height:100%;width:87%;background:linear-gradient(90deg,var(--green),var(--gold));border-radius:99px;"></div></div>
+                <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:6px;margin-bottom:4px;"><span>Shooting</span><span>81</span></div>
+                <div style="height:3px;background:rgba(255,255,255,0.08);border-radius:99px;"><div style="height:100%;width:81%;background:linear-gradient(90deg,var(--green),var(--gold));border-radius:99px;"></div></div>
+                <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:6px;margin-bottom:4px;"><span>Dribbling</span><span>79</span></div>
+                <div style="height:3px;background:rgba(255,255,255,0.08);border-radius:99px;"><div style="height:100%;width:79%;background:linear-gradient(90deg,var(--green),var(--gold));border-radius:99px;"></div></div>
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--muted);margin-bottom:2px;">Potential</div>
+                <div class="rating-circle med" style="width:36px;height:36px;font-size:16px;">84</div>
+              </div>
+            </div>
+
+            <button class="btn-primary" style="width:100%;justify-content:center;margin-top:14px;padding:10px;">
+              View Full Profile →
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     FEATURES GRID
+══════════════════════════════════════════════════════════════ -->
+<section class="section" id="features">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:52px;">
+      <div class="section-eyebrow" style="justify-content:center;text-align:center;">Why ScoutGrid</div>
+      <div class="section-title">BUILT FOR THE BEAUTIFUL GAME</div>
+      <p class="section-subtitle" style="margin:0 auto;">Everything Wyscout and Transfermarkt offer — combined into one platform, at a fraction of the price.</p>
+    </div>
+    <div class="grid-3">
+      <!-- Feature 1 -->
+      <div class="glass-card-hover" style="padding:28px 24px;">
+        <div style="width:48px;height:48px;border-radius:12px;background:rgba(0,255,135,0.1);border:1px solid rgba(0,255,135,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:18px;font-size:22px;">⚡</div>
+        <h3 class="font-display" style="font-size:22px;margin-bottom:8px;letter-spacing:0.04em;">LIVE PLAYER DATABASE</h3>
+        <p style="font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6;">4,200+ verified profiles updated in real-time. Filter by position, nationality, value, age and 12 more attributes.</p>
+      </div>
+      <!-- Feature 2 -->
+      <div class="glass-card-hover" style="padding:28px 24px;">
+        <div style="width:48px;height:48px;border-radius:12px;background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:18px;font-size:22px;">📊</div>
+        <h3 class="font-display" style="font-size:22px;margin-bottom:8px;letter-spacing:0.04em;">DEEP ANALYTICS</h3>
+        <p style="font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6;">xG, xA, progressive passes, press intensity, aerial duel % — 28 statistical categories per player per season.</p>
+      </div>
+      <!-- Feature 3 -->
+      <div class="glass-card-hover" style="padding:28px 24px;">
+        <div style="width:48px;height:48px;border-radius:12px;background:rgba(0,255,135,0.1);border:1px solid rgba(0,255,135,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:18px;font-size:22px;">🎬</div>
+        <h3 class="font-display" style="font-size:22px;margin-bottom:8px;letter-spacing:0.04em;">HIGHLIGHT REELS</h3>
+        <p style="font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6;">Players upload HD highlight videos directly on their profile. Scouts watch without leaving the platform.</p>
+      </div>
+      <!-- Feature 4 -->
+      <div class="glass-card-hover" style="padding:28px 24px;">
+        <div style="width:48px;height:48px;border-radius:12px;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:18px;font-size:22px;">📋</div>
+        <h3 class="font-display" style="font-size:22px;margin-bottom:8px;letter-spacing:0.04em;">SCOUTING REPORTS</h3>
+        <p style="font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6;">Write, save, and export structured reports. Technical, physical, mental, tactical ratings. PDF export on Pro plans.</p>
+      </div>
+      <!-- Feature 5 -->
+      <div class="glass-card-hover" style="padding:28px 24px;">
+        <div style="width:48px;height:48px;border-radius:12px;background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:18px;font-size:22px;">💬</div>
+        <h3 class="font-display" style="font-size:22px;margin-bottom:8px;letter-spacing:0.04em;">DIRECT MESSAGING</h3>
+        <p style="font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6;">Contact players, agents, and coaches directly through the platform. No intermediaries, no cold emails.</p>
+      </div>
+      <!-- Feature 6 -->
+      <div class="glass-card-hover" style="padding:28px 24px;">
+        <div style="width:48px;height:48px;border-radius:12px;background:rgba(0,255,135,0.1);border:1px solid rgba(0,255,135,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:18px;font-size:22px;">🔔</div>
+        <h3 class="font-display" style="font-size:22px;margin-bottom:8px;letter-spacing:0.04em;">SAVED SEARCH ALERTS</h3>
+        <p style="font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6;">Save your filter sets and get notified when new players matching your criteria join the platform.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     SEARCH PAGE
+══════════════════════════════════════════════════════════════ -->
+<section class="section" id="search">
+  <div class="container">
+    <div style="margin-bottom:36px;">
+      <div class="section-eyebrow">Player Discovery</div>
+      <div class="section-title">SEARCH & FILTER</div>
+    </div>
+
+    <!-- Search bar -->
+    <div class="search-bar" style="max-width:640px;">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" type="text" placeholder='Search by name, club, nationality…' value="Javier" />
+      <button class="btn-primary" style="padding:8px 20px;font-size:13px;flex-shrink:0;">Search</button>
+    </div>
+
+    <!-- Filter chips -->
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px;">
+      <span class="filter-chip active">ST / CF ✕</span>
+      <span class="filter-chip active">Age: 18-26 ✕</span>
+      <span class="filter-chip">🇪🇸 Spain</span>
+      <span class="filter-chip">Available</span>
+      <span class="filter-chip">Right Foot</span>
+      <span class="filter-chip">€0 – €10M</span>
+      <span class="filter-chip">Sort: Market Value ↓</span>
+      <button class="btn-outline" style="padding:5px 12px;font-size:12px;margin-left:auto;">+ More Filters</button>
+    </div>
+
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px;">3 players found</div>
+
+    <!-- Player cards grid -->
+    <div class="grid-3">
+
+      <!-- Card 1 -->
+      <div class="player-card glass-card">
+        <div class="player-card-banner" style="background:linear-gradient(135deg,#0d1f35,#1e3a5f);">
+          <div style="position:absolute;top:10px;left:14px;"><span class="badge badge-green">● AVAILABLE</span></div>
+          <div style="position:absolute;top:10px;right:14px;"><span class="badge badge-gold">✓ VERIFIED</span></div>
+          <div style="position:absolute;bottom:4px;right:10px;font-family:'Bebas Neue',sans-serif;font-size:60px;color:rgba(255,255,255,0.05);line-height:1;">#9</div>
+        </div>
+        <div class="player-card-body">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;">
+            <div class="player-card-avatar">JR</div>
+            <div style="text-align:right;margin-bottom:4px;">
+              <div style="font-size:10px;color:var(--muted);">Market Value</div>
+              <div class="market-val">€ 3.2M</div>
+            </div>
+          </div>
+          <div class="player-card-name">Javier Reyes</div>
+          <div class="player-card-meta">ST · Real Betis B · 🇪🇸 · 22 yrs · 183cm</div>
+          <div class="player-card-stats">
+            <div class="stat-box"><div class="val" style="color:var(--green);">18</div><div class="lbl">Goals</div></div>
+            <div class="stat-box"><div class="val">9</div><div class="lbl">Assists</div></div>
+            <div class="stat-box"><div class="val">34</div><div class="lbl">Apps</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="player-card glass-card">
+        <div class="player-card-banner" style="background:linear-gradient(135deg,#1a2332,#2d1b4e);">
+          <div style="position:absolute;top:10px;left:14px;"><span class="badge badge-gold">LOAN ONLY</span></div>
+          <div style="position:absolute;bottom:4px;right:10px;font-family:'Bebas Neue',sans-serif;font-size:60px;color:rgba(255,255,255,0.05);line-height:1;">#7</div>
+        </div>
+        <div class="player-card-body">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;">
+            <div class="player-card-avatar" style="background:#1e2d45;">AL</div>
+            <div style="text-align:right;margin-bottom:4px;">
+              <div style="font-size:10px;color:var(--muted);">Market Value</div>
+              <div class="market-val">€ 1.8M</div>
+            </div>
+          </div>
+          <div class="player-card-name">Álvaro López</div>
+          <div class="player-card-meta">CF · Villarreal B · 🇪🇸 · 20 yrs · 178cm</div>
+          <div class="player-card-stats">
+            <div class="stat-box"><div class="val" style="color:var(--green);">12</div><div class="lbl">Goals</div></div>
+            <div class="stat-box"><div class="val">6</div><div class="lbl">Assists</div></div>
+            <div class="stat-box"><div class="val">28</div><div class="lbl">Apps</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="player-card glass-card">
+        <div class="player-card-banner" style="background:linear-gradient(135deg,#1a2d1e,#2d4a2d);">
+          <div style="position:absolute;top:10px;left:14px;"><span class="badge badge-green">● AVAILABLE</span></div>
+          <div style="position:absolute;bottom:4px;right:10px;font-family:'Bebas Neue',sans-serif;font-size:60px;color:rgba(255,255,255,0.05);line-height:1;">#11</div>
+        </div>
+        <div class="player-card-body">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;">
+            <div class="player-card-avatar" style="background:#1e3020;">DM</div>
+            <div style="text-align:right;margin-bottom:4px;">
+              <div style="font-size:10px;color:var(--muted);">Market Value</div>
+              <div class="market-val">€ 950K</div>
+            </div>
+          </div>
+          <div class="player-card-name">Diego Morales</div>
+          <div class="player-card-meta">ST · Granada CF · 🇪🇸 · 24 yrs · 181cm</div>
+          <div class="player-card-stats">
+            <div class="stat-box"><div class="val" style="color:var(--green);">10</div><div class="lbl">Goals</div></div>
+            <div class="stat-box"><div class="val">4</div><div class="lbl">Assists</div></div>
+            <div class="stat-box"><div class="val">30</div><div class="lbl">Apps</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     PLAYER PROFILE PAGE
+══════════════════════════════════════════════════════════════ -->
+<section class="section" id="profile">
+  <div class="container">
+    <div style="margin-bottom:36px;">
+      <div class="section-eyebrow">Player Profile</div>
+      <div class="section-title">FULL PROFILE VIEW</div>
+    </div>
+
+    <div class="glass-card" style="overflow:hidden;">
+
+      <!-- Banner -->
+      <div class="profile-banner">
+        <div class="profile-number">9</div>
+        <div style="position:absolute;inset:0;display:flex;align-items:flex-end;padding:0 24px 0;z-index:1;">
+          <!-- nothing needed here — info is below -->
+        </div>
+      </div>
+
+      <!-- Profile body -->
+      <div style="padding:0 24px 24px;">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+          <div style="display:flex;align-items:flex-end;gap:20px;">
+            <div class="profile-avatar">JR</div>
+            <div style="padding-bottom:4px;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <h2 class="font-display" style="font-size:34px;letter-spacing:0.04em;">JAVIER REYES</h2>
+                <span class="badge badge-gold">✓ VERIFIED</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:16px;margin-top:4px;flex-wrap:wrap;">
+                <span style="font-size:13px;color:var(--muted);">Striker · Real Betis B</span>
+                <span style="font-size:13px;color:var(--muted);">🇪🇸 Spain</span>
+                <span style="font-size:13px;color:var(--muted);">22 years · 183cm · 79kg</span>
+                <span class="badge badge-green" style="font-size:11px;">● Available</span>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;padding-bottom:4px;">
+            <button class="btn-outline" style="padding:9px 18px;font-size:13px;">📋 Scout Report</button>
+            <button class="btn-primary" style="padding:9px 18px;font-size:13px;">💬 Contact</button>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs" style="margin-top:24px;">
+          <div class="tab active">Overview</div>
+          <div class="tab">Stats</div>
+          <div class="tab">Highlights</div>
+          <div class="tab">Reports</div>
+          <div class="tab">Market Value</div>
+        </div>
+
+        <!-- Overview grid -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+
+          <!-- Left column -->
+          <div style="display:flex;flex-direction:column;gap:20px;">
+
+            <!-- Bio -->
+            <div>
+              <h4 style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">About</h4>
+              <p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.7;">Explosive centre-forward with exceptional movement off the ball and a natural instinct for goal. Graduated through Real Betis academy. Technical first touch, powerful in the air, and sharp in transition. Currently available for first-team step-up or ambitious loan opportunity.</p>
+            </div>
+
+            <!-- Key attributes -->
+            <div>
+              <h4 style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;">Key Attributes</h4>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <!-- Attribute bars -->
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--muted);">Pace</span><span style="color:var(--white);font-weight:600;">87</span></div>
+                  <div style="height:5px;background:rgba(255,255,255,0.07);border-radius:99px;"><div style="height:100%;width:87%;background:linear-gradient(90deg,var(--green),#00e07a);border-radius:99px;transition:width .4s;"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--muted);">Shooting</span><span style="color:var(--white);font-weight:600;">81</span></div>
+                  <div style="height:5px;background:rgba(255,255,255,0.07);border-radius:99px;"><div style="height:100%;width:81%;background:linear-gradient(90deg,var(--green),#00e07a);border-radius:99px;"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--muted);">Dribbling</span><span style="color:var(--white);font-weight:600;">79</span></div>
+                  <div style="height:5px;background:rgba(255,255,255,0.07);border-radius:99px;"><div style="height:100%;width:79%;background:linear-gradient(90deg,var(--green),#00e07a);border-radius:99px;"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--muted);">Passing</span><span style="color:var(--white);font-weight:600;">71</span></div>
+                  <div style="height:5px;background:rgba(255,255,255,0.07);border-radius:99px;"><div style="height:100%;width:71%;background:linear-gradient(90deg,var(--gold),#e09210);border-radius:99px;"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--muted);">Aerial Duels</span><span style="color:var(--white);font-weight:600;">74</span></div>
+                  <div style="height:5px;background:rgba(255,255,255,0.07);border-radius:99px;"><div style="height:100%;width:74%;background:linear-gradient(90deg,var(--gold),#e09210);border-radius:99px;"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--muted);">Positioning</span><span style="color:var(--white);font-weight:600;">83</span></div>
+                  <div style="height:5px;background:rgba(255,255,255,0.07);border-radius:99px;"><div style="height:100%;width:83%;background:linear-gradient(90deg,var(--green),#00e07a);border-radius:99px;"></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Contract info -->
+            <div class="glass-card" style="padding:16px;">
+              <h4 style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;">Contract & Value</h4>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div><div style="font-size:11px;color:var(--muted);margin-bottom:2px;">CURRENT CLUB</div><div style="font-size:13px;font-weight:500;">Real Betis B</div></div>
+                <div><div style="font-size:11px;color:var(--muted);margin-bottom:2px;">CONTRACT UNTIL</div><div style="font-size:13px;font-weight:500;">June 2026</div></div>
+                <div><div style="font-size:11px;color:var(--muted);margin-bottom:2px;">MARKET VALUE</div><div class="market-val" style="font-size:20px;">€ 3.2M</div></div>
+                <div><div style="font-size:11px;color:var(--muted);margin-bottom:2px;">PREFERRED FOOT</div><div style="font-size:13px;font-weight:500;">Right</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right column -->
+          <div style="display:flex;flex-direction:column;gap:20px;">
+
+            <!-- Radar chart (SVG) -->
+            <div>
+              <h4 style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;">Skill Radar</h4>
+              <div style="display:flex;justify-content:center;">
+                <svg width="220" height="220" viewBox="0 0 220 220">
+                  <!-- Grid circles -->
+                  <g opacity="0.15" stroke="rgba(255,255,255,0.5)" fill="none" stroke-width="0.8">
+                    <polygon points="110,30 170,67.5 170,142.5 110,180 50,142.5 50,67.5" />
+                    <polygon points="110,52 154,75.5 154,134.5 110,158 66,134.5 66,75.5" />
+                    <polygon points="110,74 138,88 138,122 110,136 82,122 82,88" />
+                    <polygon points="110,96 122,103 122,117 110,124 98,117 98,103" />
+                  </g>
+                  <!-- Axis lines -->
+                  <g stroke="rgba(255,255,255,0.1)" stroke-width="0.8">
+                    <line x1="110" y1="30" x2="110" y2="180"/>
+                    <line x1="110" y1="105" x2="170" y2="67.5"/>
+                    <line x1="110" y1="105" x2="170" y2="142.5"/>
+                    <line x1="110" y1="105" x2="110" y2="180"/>
+                    <line x1="110" y1="105" x2="50" y2="142.5"/>
+                    <line x1="110" y1="105" x2="50" y2="67.5"/>
+                  </g>
+                  <!-- Data polygon: PAC 87, SHO 81, DRI 79, PAS 71, DEF 52, PHY 74 -->
+                  <!-- Normalized: 87/100=.87, 81/100=.81, etc. r=75 -->
+                  <!-- Points at angles: 270°(top PAC), 330°(SHO), 30°(DRI), 90°(PAS), 150°(DEF), 210°(PHY) -->
+                  <polygon
+                    points="
+                      110,40
+                      163.8,72.3
+                      160.5,144.4
+                      110,164
+                      68.5,141.2
+                      67.4,73.5
+                    "
+                    fill="rgba(0,255,135,0.15)"
+                    stroke="#00FF87"
+                    stroke-width="1.5"
+                    opacity="0.85"
+                  />
+                  <!-- Data points -->
+                  <g fill="#00FF87" r="3">
+                    <circle cx="110"   cy="40"   r="3.5" />
+                    <circle cx="163.8" cy="72.3"  r="3.5" />
+                    <circle cx="160.5" cy="144.4" r="3.5" />
+                    <circle cx="110"   cy="164"  r="3.5" />
+                    <circle cx="68.5"  cy="141.2" r="3.5" />
+                    <circle cx="67.4"  cy="73.5"  r="3.5" />
+                  </g>
+                  <!-- Labels -->
+                  <g fill="rgba(255,255,255,0.55)" font-size="11" font-family="DM Sans,sans-serif" text-anchor="middle">
+                    <text x="110" y="22">PAC 87</text>
+                    <text x="185" y="62">SHO 81</text>
+                    <text x="185" y="155">DRI 79</text>
+                    <text x="110" y="196">PAS 71</text>
+                    <text x="35"  y="155">DEF 52</text>
+                    <text x="35"  y="62">PHY 74</text>
+                  </g>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Stats season 2024/25 -->
+            <div>
+              <h4 style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;">2024/25 Stats</h4>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div class="glass-card" style="padding:12px;text-align:center;">
+                  <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--green);">18</div>
+                  <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);">Goals</div>
+                </div>
+                <div class="glass-card" style="padding:12px;text-align:center;">
+                  <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--white);">9</div>
+                  <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);">Assists</div>
+                </div>
+                <div class="glass-card" style="padding:12px;text-align:center;">
+                  <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--white);">34</div>
+                  <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);">Apps</div>
+                </div>
+                <div class="glass-card" style="padding:12px;text-align:center;">
+                  <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--gold);">7.4</div>
+                  <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);">Avg Rating</div>
+                </div>
+                <div class="glass-card" style="padding:12px;text-align:center;">
+                  <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--white);">0.62</div>
+                  <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);">xG/90</div>
+                </div>
+                <div class="glass-card" style="padding:12px;text-align:center;">
+                  <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--white);">2,890</div>
+                  <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);">Minutes</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     DASHBOARD PREVIEW
+══════════════════════════════════════════════════════════════ -->
+<section class="section" id="dashboard">
+  <div class="container">
+    <div style="margin-bottom:36px;">
+      <div class="section-eyebrow">Scout Dashboard</div>
+      <div class="section-title">YOUR COMMAND CENTRE</div>
+    </div>
+
+    <div class="glass-card" style="display:flex;overflow:hidden;min-height:500px;">
+
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="logo" style="font-size:20px;">Scout<span style="color:var(--green);">Grid</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:0.05em;">SCOUT PRO</div>
+        <div class="sidebar-nav">
+          <div class="sidebar-item active"><span class="sidebar-icon">🏠</span> Overview</div>
+          <div class="sidebar-item"><span class="sidebar-icon">🔍</span> Search Players</div>
+          <div class="sidebar-item"><span class="sidebar-icon">📋</span> Scouting Reports</div>
+          <div class="sidebar-item"><span class="sidebar-icon">⭐</span> Shortlist</div>
+          <div class="sidebar-item"><span class="sidebar-icon">💬</span> Messages <span style="margin-left:auto;background:var(--green);color:#000;font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px;">3</span></div>
+          <div class="sidebar-item"><span class="sidebar-icon">🔔</span> Saved Searches</div>
+        </div>
+        <div style="margin-top:auto;padding-top:24px;border-top:1px solid var(--border);margin-top:200px;">
+          <div class="sidebar-item"><span class="sidebar-icon">⚙️</span> Settings</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;margin-top:4px;">
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--navy-600);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--green);border:1px solid rgba(0,255,135,0.3);">JK</div>
+            <div>
+              <div style="font-size:12px;font-weight:500;">James K.</div>
+              <div style="font-size:10px;color:var(--muted);">scout_pro</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main dashboard content -->
+      <div style="flex:1;padding:28px;overflow:auto;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+          <div>
+            <h2 class="font-display" style="font-size:28px;letter-spacing:0.04em;">DASHBOARD</h2>
+            <div style="font-size:13px;color:var(--muted);">Wednesday, 7 May 2026</div>
+          </div>
+          <button class="btn-primary" style="padding:9px 18px;font-size:13px;">+ New Report</button>
+        </div>
+
+        <!-- Stat cards -->
+        <div class="grid-4" style="margin-bottom:24px;">
+          <div class="glass-card" style="padding:16px;">
+            <div style="font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">Profiles Viewed</div>
+            <div class="font-display" style="font-size:36px;line-height:1;">247</div>
+            <div style="font-size:11px;color:var(--green);margin-top:4px;">↑ 14 this week</div>
+          </div>
+          <div class="glass-card" style="padding:16px;">
+            <div style="font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">Reports Written</div>
+            <div class="font-display" style="font-size:36px;line-height:1;">38</div>
+            <div style="font-size:11px;color:var(--gold);margin-top:4px;">↑ 3 this week</div>
+          </div>
+          <div class="glass-card" style="padding:16px;">
+            <div style="font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">Shortlisted</div>
+            <div class="font-display" style="font-size:36px;line-height:1;">12</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;">Across 4 positions</div>
+          </div>
+          <div class="glass-card" style="padding:16px;">
+            <div style="font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">Messages</div>
+            <div class="font-display" style="font-size:36px;line-height:1;">3</div>
+            <div style="font-size:11px;color:var(--green);margin-top:4px;">3 unread</div>
+          </div>
+        </div>
+
+        <!-- Recent reports -->
+        <div class="glass-card" style="padding:20px;">
+          <h3 class="font-display" style="font-size:18px;letter-spacing:0.04em;margin-bottom:16px;">RECENT SCOUTING REPORTS</h3>
+          <div style="display:flex;flex-direction:column;gap:0;">
+            <!-- Report row -->
+            <div style="display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid var(--border);">
+              <div style="width:40px;height:40px;border-radius:10px;background:rgba(0,255,135,0.1);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">JR</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:500;">Javier Reyes</div>
+                <div style="font-size:11px;color:var(--muted);">ST · Real Betis B · 2 hours ago</div>
+              </div>
+              <span class="badge badge-green">SIGN</span>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--green);">8.5/10</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid var(--border);">
+              <div style="width:40px;height:40px;border-radius:10px;background:rgba(245,166,35,0.1);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">AL</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:500;">Álvaro López</div>
+                <div style="font-size:11px;color:var(--muted);">CF · Villarreal B · Yesterday</div>
+              </div>
+              <span class="badge badge-gold">MONITOR</span>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);">7.0/10</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:16px;padding:12px 0;">
+              <div style="width:40px;height:40px;border-radius:10px;background:rgba(96,165,250,0.1);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">KM</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:500;">Kenji Mori</div>
+                <div style="font-size:11px;color:var(--muted);">CAM · Gamba Osaka · 3 days ago</div>
+              </div>
+              <span class="badge badge-blue">LOAN</span>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#60A5FA;">7.5/10</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     PRICING
+══════════════════════════════════════════════════════════════ -->
+<section class="section" id="pricing">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:52px;">
+      <div class="section-eyebrow" style="justify-content:center;">Transparent Pricing</div>
+      <div class="section-title">YOUR NEXT MOVE STARTS HERE</div>
+      <p class="section-subtitle" style="margin:0 auto;">Whether you're a player seeking discovery or a scout building the next great team.</p>
+    </div>
+
+    <!-- FOR PLAYERS -->
+    <h3 class="font-display" style="font-size:20px;letter-spacing:0.06em;margin-bottom:6px;">FOR PLAYERS</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Get discovered by scouts and clubs worldwide</p>
+    <div class="grid-3" style="margin-bottom:48px;">
+
+      <div class="pricing-card">
+        <div class="font-display" style="font-size:16px;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px;">FREE</div>
+        <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:4px;">
+          <div class="price-amount">€0</div>
+        </div>
+        <div class="price-period">forever</div>
+        <hr style="border-color:var(--border);margin:20px 0;" />
+        <ul class="feature-list">
+          <li>Basic profile page</li>
+          <li>Appear in search results</li>
+          <li class="locked">Who viewed your profile</li>
+          <li class="locked">Upload highlight videos</li>
+          <li class="locked">Direct messaging</li>
+        </ul>
+        <button class="btn-outline" style="width:100%;justify-content:center;margin-top:24px;">Get Started Free</button>
+      </div>
+
+      <div class="pricing-card">
+        <div class="font-display" style="font-size:16px;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px;">VISIBLE</div>
+        <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:4px;">
+          <div class="price-amount">€9</div>
+          <span style="font-size:18px;color:var(--muted);">.99</span>
+        </div>
+        <div class="price-period">per month</div>
+        <hr style="border-color:var(--border);margin:20px 0;" />
+        <ul class="feature-list">
+          <li>Everything in Free</li>
+          <li>See who viewed your profile</li>
+          <li>2 highlight video uploads</li>
+          <li>5 messages per month</li>
+          <li class="locked">Full analytics dashboard</li>
+        </ul>
+        <button class="btn-outline" style="width:100%;justify-content:center;margin-top:24px;">Upgrade to Visible</button>
+      </div>
+
+      <div class="pricing-card featured">
+        <div class="font-display" style="font-size:16px;letter-spacing:0.08em;color:var(--green);margin-bottom:8px;">PRO ATHLETE</div>
+        <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:4px;">
+          <div class="price-amount" style="color:var(--green);">€24</div>
+          <span style="font-size:18px;color:var(--muted);">.99</span>
+        </div>
+        <div class="price-period">per month</div>
+        <hr style="border-color:rgba(0,255,135,0.15);margin:20px 0;" />
+        <ul class="feature-list">
+          <li>Everything in Visible</li>
+          <li>Full analytics dashboard</li>
+          <li>10 highlight videos</li>
+          <li>Unlimited messaging</li>
+          <li>Priority in search results</li>
+        </ul>
+        <button class="btn-primary" style="width:100%;justify-content:center;margin-top:24px;">Go Pro Athlete →</button>
+      </div>
+    </div>
+
+    <!-- FOR SCOUTS -->
+    <h3 class="font-display" style="font-size:20px;letter-spacing:0.06em;margin-bottom:6px;">FOR SCOUTS & CLUBS</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Access the complete database and build your shortlist</p>
+    <div class="grid-3">
+
+      <div class="pricing-card">
+        <div class="font-display" style="font-size:16px;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px;">SCOUT BASIC</div>
+        <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:4px;">
+          <div class="price-amount">€49</div>
+          <span style="font-size:18px;color:var(--muted);">.99</span>
+        </div>
+        <div class="price-period">per month</div>
+        <hr style="border-color:var(--border);margin:20px 0;" />
+        <ul class="feature-list">
+          <li>50 profile views / month</li>
+          <li>Write scouting reports</li>
+          <li>Save up to 3 searches</li>
+          <li class="locked">Export reports to PDF</li>
+          <li class="locked">Market value history</li>
+        </ul>
+        <button class="btn-outline" style="width:100%;justify-content:center;margin-top:24px;">Start Scouting</button>
+      </div>
+
+      <div class="pricing-card featured">
+        <div class="font-display" style="font-size:16px;letter-spacing:0.08em;color:var(--green);margin-bottom:8px;">SCOUT PRO</div>
+        <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:4px;">
+          <div class="price-amount" style="color:var(--green);">€129</div>
+          <span style="font-size:18px;color:var(--muted);">.99</span>
+        </div>
+        <div class="price-period">per month</div>
+        <hr style="border-color:rgba(0,255,135,0.15);margin:20px 0;" />
+        <ul class="feature-list">
+          <li>Unlimited profile views</li>
+          <li>Export reports to PDF</li>
+          <li>Full market value history</li>
+          <li>Unlimited messaging</li>
+          <li>Saved search alerts</li>
+        </ul>
+        <button class="btn-primary" style="width:100%;justify-content:center;margin-top:24px;">Go Scout Pro →</button>
+      </div>
+
+      <div class="pricing-card" style="border-color:rgba(245,166,35,0.3);">
+        <div class="font-display" style="font-size:16px;letter-spacing:0.08em;color:var(--gold);margin-bottom:8px;">CLUB ELITE</div>
+        <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:4px;">
+          <div class="price-amount" style="color:var(--gold);">€299</div>
+          <span style="font-size:18px;color:var(--muted);">.99</span>
+        </div>
+        <div class="price-period">per month</div>
+        <hr style="border-color:rgba(245,166,35,0.15);margin:20px 0;" />
+        <ul class="feature-list">
+          <li>Everything in Scout Pro</li>
+          <li>5 scout seats included</li>
+          <li>Team shortlist & comparison</li>
+          <li>Priority support</li>
+          <li>Custom branding</li>
+        </ul>
+        <button class="btn-outline" style="width:100%;justify-content:center;margin-top:24px;border-color:rgba(245,166,35,0.3);color:var(--gold);">Contact Sales</button>
+      </div>
+    </div>
+
+    <!-- Risk reversal -->
+    <div class="glass-card" style="padding:40px;text-align:center;max-width:700px;margin:48px auto 0;border-color:rgba(0,255,135,0.15);">
+      <h3 class="font-display" style="font-size:30px;letter-spacing:0.04em;margin-bottom:12px;">ZERO RISK GUARANTEE</h3>
+      <p style="color:rgba(255,255,255,0.5);font-size:14px;margin-bottom:32px;">We're confident ScoutGrid will change your football career. If you're not satisfied, we'll refund you completely — no questions asked.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+          <div style="width:48px;height:48px;border-radius:12px;background:rgba(0,255,135,0.08);border:1px solid rgba(0,255,135,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;">↩</div>
+          <div style="font-size:13px;font-weight:500;">14-Day Money Back</div>
+          <div style="font-size:12px;color:var(--muted);text-align:center;">Full refund within 14 days</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+          <div style="width:48px;height:48px;border-radius:12px;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;">🔒</div>
+          <div style="font-size:13px;font-weight:500;">Cancel Anytime</div>
+          <div style="font-size:12px;color:var(--muted);text-align:center;">No lock-ins, one click cancel</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+          <div style="width:48px;height:48px;border-radius:12px;background:rgba(0,255,135,0.08);border:1px solid rgba(0,255,135,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;">✓</div>
+          <div style="font-size:13px;font-weight:500;">Scout View Promise</div>
+          <div style="font-size:12px;color:var(--muted);text-align:center;">No views in 30 days → free month</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     FINAL CTA
+══════════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+    <div style="text-align:center;max-width:700px;margin:0 auto;padding:60px 0;">
+      <div class="section-eyebrow" style="justify-content:center;">Ready to start?</div>
+      <h2 class="font-display" style="font-size:clamp(40px,6vw,72px);line-height:0.95;letter-spacing:0.03em;margin-bottom:24px;">
+        YOUR CAREER<br /><span style="color:var(--green);">STARTS NOW</span>
+      </h2>
+      <p style="color:rgba(255,255,255,0.5);font-size:16px;margin-bottom:40px;line-height:1.7;">
+        Join 4,200+ players already on ScoutGrid. Free to join. No credit card required.
+      </p>
+      <div style="display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;">
+        <button class="btn-primary" style="font-size:15px;padding:14px 36px;">I'm a Player — Get Discovered →</button>
+        <button class="btn-outline" style="font-size:15px;padding:14px 36px;">I'm a Scout — Find Talent →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════════════════════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="logo" style="font-size:24px;margin-bottom:12px;">Scout<span>Grid</span></div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.7;max-width:260px;">The premier football intelligence platform connecting talent with opportunity worldwide.</p>
+        <div style="display:flex;gap:12px;margin-top:20px;">
+          <div style="width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;">𝕏</div>
+          <div style="width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;">in</div>
+          <div style="width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;">📷</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:16px;">Platform</div>
+        <div class="footer-links">
+          <a href="#">Search Players</a>
+          <a href="#">Pricing</a>
+          <a href="#">Scout Pro</a>
+          <a href="#">Club Elite</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:16px;">Company</div>
+        <div class="footer-links">
+          <a href="#">About</a>
+          <a href="#">Blog</a>
+          <a href="#">Careers</a>
+          <a href="#">Press</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:16px;">Legal</div>
+        <div class="footer-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">Cookie Policy</a>
+          <a href="#">GDPR</a>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:48px;padding-top:24px;border-top:1px solid var(--border);flex-wrap:wrap;gap:12px;">
+      <div style="font-size:12px;color:var(--muted);">© 2026 ScoutGrid. All rights reserved.</div>
+      <div style="font-size:12px;color:var(--muted);">Built for the beautiful game ⚽</div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
