@@ -67,6 +67,7 @@ async function seedPlans() {
       role_target: "player_coach",
       price_monthly: 9.99,
       price_annual: 95.9,
+      stripe_price_id_monthly: "price_1TUow6JKJsfAsDMJQDnWiLtb",
       features: [
         { label: "Searchable profile", available: true },
         { label: "2 highlight videos", available: true },
@@ -87,6 +88,7 @@ async function seedPlans() {
       role_target: "player_coach",
       price_monthly: 24.99,
       price_annual: 239.9,
+      stripe_price_id_monthly: "price_1TUowkJKJsfAsDMJTAh3tR71",
       features: [
         { label: "All Visible features", available: true },
         { label: "10 highlight videos", available: true },
@@ -108,6 +110,7 @@ async function seedPlans() {
       role_target: "scout_agent",
       price_monthly: 49.99,
       price_annual: 479.9,
+      stripe_price_id_monthly: "price_1TUoxJJKJsfAsDMJOyyfVgSj",
       features: [
         { label: "Search & view 50 profiles/month", available: true },
         { label: "Save searches & filters", available: true },
@@ -131,6 +134,7 @@ async function seedPlans() {
       role_target: "scout_agent",
       price_monthly: 129.99,
       price_annual: 1247.9,
+      stripe_price_id_monthly: "price_1TUoxpJKJsfAsDMJPApYPBd7",
       features: [
         { label: "Unlimited profile views", available: true },
         { label: "Advanced filters & metrics", available: true },
@@ -153,6 +157,7 @@ async function seedPlans() {
       role_target: "club",
       price_monthly: 299.99,
       price_annual: 2879.9,
+      stripe_price_id_monthly: "price_1TUoyGJKJsfAsDMJtewQJRuY",
       features: [
         { label: "Everything in Scout Pro", available: true },
         { label: "5 user seats", available: true },

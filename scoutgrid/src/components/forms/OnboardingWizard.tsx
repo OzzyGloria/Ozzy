@@ -329,14 +329,14 @@ export function OnboardingStep({ step, user }: OnboardingStepProps) {
   if (step === 5) {
     const plans = isScout
       ? [
-          { slug: "scout_basic", name: "Scout Basic", price: "€49.99/mo", features: ["50 profile views/mo", "Save searches", "Write reports"] },
-          { slug: "scout_pro", name: "Scout Pro", price: "€129.99/mo", features: ["Unlimited views", "Advanced filters", "PDF export", "Direct messaging"], popular: true },
-          { slug: "club_elite", name: "Club Elite", price: "€299.99/mo", features: ["5 user seats", "Team dashboard", "API access", "Market value analytics"] },
+          { slug: "scout_basic", name: "Scout Basic", price: "£49.99/mo", features: ["50 profile views/mo", "Save searches", "Write reports"] },
+          { slug: "scout_pro", name: "Scout Pro", price: "£129.99/mo", features: ["Unlimited views", "Advanced filters", "PDF export", "Direct messaging"], popular: true },
+          { slug: "club_elite", name: "Club Elite", price: "£299.99/mo", features: ["5 user seats", "Team dashboard", "API access", "Market value analytics"] },
         ]
       : [
-          { slug: "free", name: "Free Starter", price: "€0", features: ["Basic profile", "Not searchable"] },
-          { slug: "visible", name: "Visible", price: "€9.99/mo", features: ["Searchable profile", "2 highlights", "See who viewed you"] },
-          { slug: "pro_athlete", name: "Pro Athlete", price: "€24.99/mo", features: ["10 highlights", "Priority placement", "Full analytics", "Direct messages"], popular: true },
+          { slug: "free", name: "Free Starter", price: "£0", features: ["Basic profile", "Not searchable"] },
+          { slug: "visible", name: "Visible", price: "£9.99/mo", features: ["Searchable profile", "2 highlights", "See who viewed you"] },
+          { slug: "pro_athlete", name: "Pro Athlete", price: "£24.99/mo", features: ["10 highlights", "Priority placement", "Full analytics", "Direct messages"], popular: true },
         ];
 
     return (

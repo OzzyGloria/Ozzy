@@ -155,7 +155,7 @@ export function SearchFilters({ isScoutPro = false }: SearchFiltersProps) {
           <SelectField label="Preferred Foot" value={foot} onChange={setFoot} options={PREFERRED_FOOT} />
 
           <div>
-            <label className="block text-xs text-white/40 mb-1.5 uppercase tracking-wider">Market Value (€)</label>
+            <label className="block text-xs text-white/40 mb-1.5 uppercase tracking-wider">Market Value (£)</label>
             <div className="flex items-center gap-2">
               <input
                 type="number"

@@ -12,7 +12,7 @@ interface UpgradeModalProps {
 const PLAN_FEATURES: Record<string, { name: string; features: string[]; price: string }> = {
   scout_pro: {
     name: "Scout Pro",
-    price: "€129.99/mo",
+    price: "£129.99/mo",
     features: [
       "Unlimited player profiles",
       "Advanced filters & metrics",
@@ -24,7 +24,7 @@ const PLAN_FEATURES: Record<string, { name: string; features: string[]; price: s
   },
   pro_athlete: {
     name: "Pro Athlete",
-    price: "€24.99/mo",
+    price: "£24.99/mo",
     features: [
       "Searchable profile",
       "10 highlight videos",

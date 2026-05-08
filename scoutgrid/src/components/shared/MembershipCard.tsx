@@ -103,7 +103,7 @@ export function MembershipCard({ plan, isCurrentPlan, billingPeriod, isAuthentic
           <div className="font-display text-4xl text-white">FREE</div>
         ) : (
           <div className="flex items-end gap-1">
-            <span className="font-display text-4xl text-white">€{price.toFixed(2)}</span>
+            <span className="font-display text-4xl text-white">£{price.toFixed(2)}</span>
             <span className="text-white/40 text-sm mb-1">/mo</span>
           </div>
         )}

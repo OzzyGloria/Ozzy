@@ -68,7 +68,7 @@ export function HeroSection() {
             { value: "2,400+", label: "Player Profiles" },
             { value: "380+", label: "Active Scouts" },
             { value: "47", label: "Countries" },
-            { value: "€1.2B+", label: "Total Player Value" },
+            { value: "£1.2B+", label: "Total Player Value" },
           ].map(({ value, label }) => (
             <div key={label} className="text-center">
               <div className="font-display text-3xl text-white mb-1">{value}</div>

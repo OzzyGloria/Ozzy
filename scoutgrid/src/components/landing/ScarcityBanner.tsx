@@ -30,7 +30,7 @@ export function ScarcityBanner() {
                 Founding Member Pricing — Only <span className="text-gold font-display">{spotsLeft}</span> spots left
               </p>
               <p className="text-white/40 text-xs">
-                Scout Pro at €129.99/mo (normally €199.99). Lock in founding rate forever.
+                Scout Pro at £129.99/mo (normally £199.99). Lock in founding rate forever.
               </p>
             </div>
           </div>

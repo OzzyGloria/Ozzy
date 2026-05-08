@@ -5,14 +5,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(amount: number, currency = "EUR"): string {
+export function formatCurrency(amount: number, currency = "GBP"): string {
   if (amount >= 1_000_000) {
-    return `€${(amount / 1_000_000).toFixed(1)}M`;
+    return `£${(amount / 1_000_000).toFixed(1)}M`;
   }
   if (amount >= 1_000) {
-    return `€${(amount / 1_000).toFixed(0)}K`;
+    return `£${(amount / 1_000).toFixed(0)}K`;
   }
-  return new Intl.NumberFormat("en-EU", {
+  return new Intl.NumberFormat("en-GB", {
     style: "currency",
     currency,
     maximumFractionDigits: 0,
